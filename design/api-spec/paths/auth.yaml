@@ -1,0 +1,23 @@
+post:
+  tags:
+    - Auth
+  summary: Login
+  operationId: login
+  security: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/LoginRequest
+  responses:
+    "200":
+      description: Login successful.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/LoginResponse
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest
+    "401":
+      $ref: ../components/responses/errors.yaml#/Unauthorized

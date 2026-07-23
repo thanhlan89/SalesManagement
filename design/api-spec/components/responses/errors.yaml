@@ -1,0 +1,30 @@
+BadRequest:
+  description: The request is invalid.
+  content:
+    application/json:
+      schema:
+        $ref: ../schemas/index.yaml#/ErrorResponse
+Unauthorized:
+  description: Authentication is required or the token is invalid.
+  content:
+    application/json:
+      schema:
+        $ref: ../schemas/index.yaml#/ErrorResponse
+Forbidden:
+  description: The authenticated user does not have permission.
+  content:
+    application/json:
+      schema:
+        $ref: ../schemas/index.yaml#/ErrorResponse
+NotFound:
+  description: The requested resource was not found.
+  content:
+    application/json:
+      schema:
+        $ref: ../schemas/index.yaml#/ErrorResponse
+InternalServerError:
+  description: An unexpected server error occurred.
+  content:
+    application/json:
+      schema:
+        $ref: ../schemas/index.yaml#/ErrorResponse

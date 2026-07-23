@@ -1,0 +1,7 @@
+bearerAuth:
+  type: http
+  scheme: bearer
+  bearerFormat: JWT
+  description: >
+    JWT issued on login. Pass as `Authorization: Bearer <token>`.
+    Public endpoints override the global security requirement with `security: []`.

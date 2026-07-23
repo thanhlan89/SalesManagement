@@ -1,0 +1,24 @@
+openapi: 3.0.3
+info:
+  $ref: ./defaults/info.yaml
+servers:
+  $ref: ./defaults/servers.yaml
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+    description: Authentication and session endpoints.
+  - name: Users
+    description: User management endpoints.
+paths:
+  /auth/login:
+    $ref: ./paths/auth.yaml
+  /users:
+    $ref: ./paths/users.yaml
+components:
+  securitySchemes:
+    $ref: ./components/securitySchemes.yaml
+  schemas:
+    $ref: ./components/schemas/index.yaml
+  responses:
+    $ref: ./components/responses/errors.yaml

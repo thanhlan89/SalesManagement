@@ -1,0 +1,9 @@
+title: SalesManagement API
+description: API specification for the SalesManagement system.
+version: 0.1.0
+contact:
+  name: None
+  email: None
+license:
+  name: Unlicense
+  url: https://unlicense.org/

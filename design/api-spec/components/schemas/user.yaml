@@ -1,0 +1,98 @@
+User:
+  type: object
+  required:
+    - id
+    - name
+    - email
+    - role
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: string
+      format: uuid
+      example: 7d5aabdc-52b1-4d7a-9c97-e4aab8ec5a10
+    name:
+      type: string
+      example: Nguyen Van A
+    email:
+      type: string
+      format: email
+      example: user@salesmanagement.local
+    role:
+      type: string
+      enum:
+        - admin
+        - manager
+        - sales
+      example: sales
+    phone:
+      type: string
+      nullable: true
+      example: "+84901234567"
+    isActive:
+      type: boolean
+      example: true
+    createdAt:
+      type: string
+      format: date-time
+      example: "2026-07-23T14:00:00Z"
+    updatedAt:
+      type: string
+      format: date-time
+      example: "2026-07-23T14:00:00Z"
+CreateUserRequest:
+  type: object
+  required:
+    - name
+    - email
+    - password
+    - role
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 120
+      example: Nguyen Van A
+    email:
+      type: string
+      format: email
+      example: user@salesmanagement.local
+    password:
+      type: string
+      format: password
+      minLength: 8
+      example: password123
+    role:
+      type: string
+      enum:
+        - admin
+        - manager
+        - sales
+      example: sales
+    phone:
+      type: string
+      nullable: true
+      example: "+84901234567"
+UpdateUserRequest:
+  type: object
+  properties:
+    name:
+      type: string
+      minLength: 1
+      maxLength: 120
+      example: Nguyen Van A
+    role:
+      type: string
+      enum:
+        - admin
+        - manager
+        - sales
+      example: manager
+    phone:
+      type: string
+      nullable: true
+      example: "+84901234567"
+    isActive:
+      type: boolean
+      example: true

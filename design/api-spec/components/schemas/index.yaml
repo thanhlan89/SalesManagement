@@ -1,0 +1,55 @@
+User:
+  $ref: ./user.yaml#/User
+CreateUserRequest:
+  $ref: ./user.yaml#/CreateUserRequest
+UpdateUserRequest:
+  $ref: ./user.yaml#/UpdateUserRequest
+LoginRequest:
+  type: object
+  required:
+    - email
+    - password
+  properties:
+    email:
+      type: string
+      format: email
+      example: admin@salesmanagement.local
+    password:
+      type: string
+      format: password
+      minLength: 8
+      example: password123
+LoginResponse:
+  type: object
+  required:
+    - accessToken
+    - tokenType
+    - expiresIn
+    - user
+  properties:
+    accessToken:
+      type: string
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    tokenType:
+      type: string
+      example: Bearer
+    expiresIn:
+      type: integer
+      format: int32
+      example: 3600
+    user:
+      $ref: ./user.yaml#/User
+ErrorResponse:
+  type: object
+  required:
+    - message
+  properties:
+    message:
+      type: string
+      example: Validation failed
+    code:
+      type: string
+      example: VALIDATION_ERROR
+    details:
+      type: object
+      additionalProperties: true
