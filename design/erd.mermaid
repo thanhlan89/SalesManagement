@@ -1,0 +1,298 @@
+erDiagram
+    USER ||--o{ CUSTOMER : owns
+    USER ||--o{ OPPORTUNITY : manages
+    USER ||--o{ QUOTE : creates
+    USER ||--o{ SALES_ORDER : creates
+    USER ||--o{ ACTIVITY_LOG : performs
+
+    CUSTOMER ||--o{ CUSTOMER_CONTACT : has
+    CUSTOMER ||--o{ CUSTOMER_ADDRESS : has
+    CUSTOMER ||--o{ OPPORTUNITY : opens
+    CUSTOMER ||--o{ QUOTE : requests
+    CUSTOMER ||--o{ SALES_ORDER : places
+
+    SALES_PIPELINE ||--o{ PIPELINE_STAGE : contains
+    PIPELINE_STAGE ||--o{ OPPORTUNITY : classifies
+    OPPORTUNITY ||--o{ QUOTE : converted_to
+
+    QUOTE ||--|{ QUOTE_ITEM : contains
+    QUOTE ||--o| SALES_ORDER : accepted_as
+
+    PRODUCT_CATEGORY ||--o{ PRODUCT : groups
+    PRODUCT ||--o{ QUOTE_ITEM : quoted_as
+    PRODUCT ||--o{ SALES_ORDER_ITEM : sold_as
+    PRODUCT ||--o{ INVENTORY_BALANCE : stocked_as
+    PRODUCT ||--o{ INVENTORY_MOVEMENT : moves_as
+
+    WAREHOUSE ||--o{ INVENTORY_BALANCE : stores
+    WAREHOUSE ||--o{ INVENTORY_MOVEMENT : records
+
+    SALES_ORDER ||--|{ SALES_ORDER_ITEM : contains
+    SALES_ORDER ||--o{ DELIVERY : ships_as
+    SALES_ORDER ||--o| INVOICE : billed_by
+
+    INVOICE ||--o{ PAYMENT : paid_by
+
+    USER {
+        uuid id PK
+        string name
+        string email UK
+        string password_hash
+        string role "admin | manager | sales | accountant | warehouse"
+        string phone
+        boolean is_active
+        datetime last_login_at
+        datetime created_at
+        datetime updated_at
+    }
+
+    CUSTOMER {
+        uuid id PK
+        uuid owner_id FK
+        string code UK
+        string name
+        string type "individual | company"
+        string tax_code UK
+        string email
+        string phone
+        string status "lead | active | inactive | blocked"
+        decimal credit_limit
+        integer payment_term_days
+        datetime created_at
+        datetime updated_at
+    }
+
+    CUSTOMER_CONTACT {
+        uuid id PK
+        uuid customer_id FK
+        string name
+        string title
+        string email
+        string phone
+        boolean is_primary
+        datetime created_at
+        datetime updated_at
+    }
+
+    CUSTOMER_ADDRESS {
+        uuid id PK
+        uuid customer_id FK
+        string type "billing | shipping | other"
+        string line1
+        string line2
+        string ward
+        string district
+        string city
+        string country
+        boolean is_default
+        datetime created_at
+        datetime updated_at
+    }
+
+    SALES_PIPELINE {
+        uuid id PK
+        string name UK
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    PIPELINE_STAGE {
+        uuid id PK
+        uuid pipeline_id FK
+        string name
+        integer sort_order
+        decimal probability
+        boolean is_won_stage
+        boolean is_lost_stage
+        datetime created_at
+        datetime updated_at
+    }
+
+    OPPORTUNITY {
+        uuid id PK
+        uuid customer_id FK
+        uuid owner_id FK
+        uuid stage_id FK
+        string code UK
+        string title
+        decimal estimated_value
+        date expected_close_date
+        string source
+        string status "open | won | lost"
+        string lost_reason
+        datetime created_at
+        datetime updated_at
+    }
+
+    PRODUCT_CATEGORY {
+        uuid id PK
+        uuid parent_id FK
+        string name UK
+        string description
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    PRODUCT {
+        uuid id PK
+        uuid category_id FK
+        string sku UK
+        string name
+        string unit
+        decimal list_price
+        decimal cost_price
+        decimal tax_rate
+        integer reorder_level
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    QUOTE {
+        uuid id PK
+        uuid customer_id FK
+        uuid opportunity_id FK
+        uuid created_by_id FK
+        string code UK
+        string status "draft | sent | accepted | rejected | expired"
+        date quote_date
+        date valid_until
+        decimal subtotal
+        decimal discount_amount
+        decimal tax_amount
+        decimal total_amount
+        string note
+        datetime created_at
+        datetime updated_at
+    }
+
+    QUOTE_ITEM {
+        uuid id PK
+        uuid quote_id FK
+        uuid product_id FK
+        integer quantity
+        decimal unit_price
+        decimal discount_amount
+        decimal tax_amount
+        decimal line_total
+    }
+
+    SALES_ORDER {
+        uuid id PK
+        uuid customer_id FK
+        uuid quote_id FK
+        uuid created_by_id FK
+        uuid billing_address_id FK
+        uuid shipping_address_id FK
+        string code UK
+        string status "draft | confirmed | processing | fulfilled | cancelled"
+        date order_date
+        date expected_delivery_date
+        decimal subtotal
+        decimal discount_amount
+        decimal tax_amount
+        decimal total_amount
+        string note
+        datetime created_at
+        datetime updated_at
+    }
+
+    SALES_ORDER_ITEM {
+        uuid id PK
+        uuid sales_order_id FK
+        uuid product_id FK
+        integer quantity
+        decimal unit_price
+        decimal discount_amount
+        decimal tax_amount
+        decimal line_total
+    }
+
+    WAREHOUSE {
+        uuid id PK
+        string code UK
+        string name
+        string address
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
+
+    INVENTORY_BALANCE {
+        uuid id PK
+        uuid warehouse_id FK
+        uuid product_id FK
+        integer quantity_on_hand
+        integer quantity_reserved
+        integer quantity_available
+        datetime updated_at
+    }
+
+    INVENTORY_MOVEMENT {
+        uuid id PK
+        uuid warehouse_id FK
+        uuid product_id FK
+        string type "in | out | transfer | adjustment | reservation"
+        integer quantity
+        string reference_type
+        uuid reference_id
+        string note
+        datetime created_at
+    }
+
+    DELIVERY {
+        uuid id PK
+        uuid sales_order_id FK
+        string code UK
+        string status "pending | picking | shipped | delivered | failed | cancelled"
+        date planned_date
+        date shipped_date
+        date delivered_date
+        string carrier
+        string tracking_number
+        datetime created_at
+        datetime updated_at
+    }
+
+    INVOICE {
+        uuid id PK
+        uuid sales_order_id FK
+        string code UK
+        string status "draft | issued | partially_paid | paid | overdue | void"
+        date issued_date
+        date due_date
+        decimal subtotal
+        decimal tax_amount
+        decimal total_amount
+        decimal paid_amount
+        datetime created_at
+        datetime updated_at
+    }
+
+    PAYMENT {
+        uuid id PK
+        uuid invoice_id FK
+        string code UK
+        string method "cash | bank_transfer | card | other"
+        decimal amount
+        date paid_date
+        string transaction_ref
+        string status "pending | confirmed | failed | refunded"
+        string note
+        datetime created_at
+        datetime updated_at
+    }
+
+    ACTIVITY_LOG {
+        uuid id PK
+        uuid actor_id FK
+        string entity_type
+        uuid entity_id
+        string action
+        string ip_address
+        string user_agent
+        json metadata
+        datetime created_at
+    }
