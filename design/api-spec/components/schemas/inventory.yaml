@@ -1,0 +1,111 @@
+Warehouse:
+  type: object
+  required:
+    - id
+    - code
+    - name
+    - isActive
+  properties:
+    id:
+      type: string
+      format: uuid
+    code:
+      type: string
+      example: WH-HCM
+    name:
+      type: string
+    address:
+      type: string
+      nullable: true
+    isActive:
+      type: boolean
+InventoryBalance:
+  type: object
+  required:
+    - id
+    - warehouseId
+    - productId
+    - quantityOnHand
+    - quantityReserved
+    - quantityAvailable
+  properties:
+    id:
+      type: string
+      format: uuid
+    warehouseId:
+      type: string
+      format: uuid
+    productId:
+      type: string
+      format: uuid
+    quantityOnHand:
+      type: integer
+    quantityReserved:
+      type: integer
+    quantityAvailable:
+      type: integer
+InventoryMovement:
+  type: object
+  required:
+    - id
+    - warehouseId
+    - productId
+    - type
+    - quantity
+  properties:
+    id:
+      type: string
+      format: uuid
+    warehouseId:
+      type: string
+      format: uuid
+    productId:
+      type: string
+      format: uuid
+    type:
+      type: string
+      enum:
+        - in
+        - out
+        - transfer
+        - adjustment
+        - reservation
+    quantity:
+      type: integer
+    referenceType:
+      type: string
+      nullable: true
+    referenceId:
+      type: string
+      format: uuid
+      nullable: true
+    note:
+      type: string
+      nullable: true
+CreateInventoryMovementRequest:
+  type: object
+  required:
+    - warehouseId
+    - productId
+    - type
+    - quantity
+  properties:
+    warehouseId:
+      type: string
+      format: uuid
+    productId:
+      type: string
+      format: uuid
+    type:
+      type: string
+      enum:
+        - in
+        - out
+        - transfer
+        - adjustment
+        - reservation
+    quantity:
+      type: integer
+    note:
+      type: string
+      nullable: true

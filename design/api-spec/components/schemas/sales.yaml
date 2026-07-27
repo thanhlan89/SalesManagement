@@ -1,0 +1,204 @@
+Quote:
+  type: object
+  required:
+    - id
+    - customerId
+    - createdById
+    - code
+    - status
+    - quoteDate
+    - totalAmount
+  properties:
+    id:
+      type: string
+      format: uuid
+    customerId:
+      type: string
+      format: uuid
+    opportunityId:
+      type: string
+      format: uuid
+      nullable: true
+    createdById:
+      type: string
+      format: uuid
+    code:
+      type: string
+    status:
+      type: string
+      enum:
+        - draft
+        - sent
+        - accepted
+        - rejected
+        - expired
+    quoteDate:
+      type: string
+      format: date
+    validUntil:
+      type: string
+      format: date
+      nullable: true
+    subtotal:
+      type: number
+      format: decimal
+    discountAmount:
+      type: number
+      format: decimal
+    taxAmount:
+      type: number
+      format: decimal
+    totalAmount:
+      type: number
+      format: decimal
+    note:
+      type: string
+      nullable: true
+    items:
+      type: array
+      items:
+        $ref: ./sales.yaml#/QuoteItem
+QuoteItem:
+  type: object
+  required:
+    - productId
+    - quantity
+    - unitPrice
+  properties:
+    productId:
+      type: string
+      format: uuid
+    quantity:
+      type: integer
+      minimum: 1
+    unitPrice:
+      type: number
+      format: decimal
+      minimum: 0
+    discountAmount:
+      type: number
+      format: decimal
+      minimum: 0
+CreateQuoteRequest:
+  type: object
+  required:
+    - customerId
+    - items
+  properties:
+    customerId:
+      type: string
+      format: uuid
+    opportunityId:
+      type: string
+      format: uuid
+      nullable: true
+    validUntil:
+      type: string
+      format: date
+      nullable: true
+    note:
+      type: string
+      nullable: true
+    items:
+      type: array
+      minItems: 1
+      items:
+        $ref: ./sales.yaml#/QuoteItem
+UpdateQuoteRequest:
+  allOf:
+    - $ref: ./sales.yaml#/CreateQuoteRequest
+SalesOrder:
+  type: object
+  required:
+    - id
+    - customerId
+    - createdById
+    - code
+    - status
+    - orderDate
+    - totalAmount
+  properties:
+    id:
+      type: string
+      format: uuid
+    customerId:
+      type: string
+      format: uuid
+    quoteId:
+      type: string
+      format: uuid
+      nullable: true
+    createdById:
+      type: string
+      format: uuid
+    billingAddressId:
+      type: string
+      format: uuid
+      nullable: true
+    shippingAddressId:
+      type: string
+      format: uuid
+      nullable: true
+    code:
+      type: string
+    status:
+      type: string
+      enum:
+        - draft
+        - confirmed
+        - processing
+        - fulfilled
+        - cancelled
+    orderDate:
+      type: string
+      format: date
+    expectedDeliveryDate:
+      type: string
+      format: date
+      nullable: true
+    totalAmount:
+      type: number
+      format: decimal
+    items:
+      type: array
+      items:
+        $ref: ./sales.yaml#/SalesOrderItem
+SalesOrderItem:
+  allOf:
+    - $ref: ./sales.yaml#/QuoteItem
+CreateSalesOrderRequest:
+  type: object
+  required:
+    - customerId
+    - items
+  properties:
+    customerId:
+      type: string
+      format: uuid
+    quoteId:
+      type: string
+      format: uuid
+      nullable: true
+    billingAddressId:
+      type: string
+      format: uuid
+      nullable: true
+    shippingAddressId:
+      type: string
+      format: uuid
+      nullable: true
+    expectedDeliveryDate:
+      type: string
+      format: date
+      nullable: true
+    note:
+      type: string
+      nullable: true
+    items:
+      type: array
+      minItems: 1
+      items:
+        $ref: ./sales.yaml#/SalesOrderItem
+UpdateSalesOrderRequest:
+  allOf:
+    - $ref: ./sales.yaml#/CreateSalesOrderRequest

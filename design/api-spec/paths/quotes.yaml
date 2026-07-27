@@ -1,0 +1,53 @@
+get:
+  tags:
+    - Sales
+  summary: List quotes
+  operationId: listQuotes
+  parameters:
+    - name: customerId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    - name: status
+      in: query
+      schema:
+        type: string
+        enum:
+          - draft
+          - sent
+          - accepted
+          - rejected
+          - expired
+  responses:
+    "200":
+      description: Quotes returned successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../components/schemas/index.yaml#/Quote
+post:
+  tags:
+    - Sales
+  summary: Create quote
+  operationId: createQuote
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/CreateQuoteRequest
+  responses:
+    "201":
+      description: Quote created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/Quote
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest

@@ -1,0 +1,130 @@
+SalesPipeline:
+  type: object
+  required:
+    - id
+    - name
+    - isActive
+  properties:
+    id:
+      type: string
+      format: uuid
+    name:
+      type: string
+      example: Default Sales Pipeline
+    isActive:
+      type: boolean
+    stages:
+      type: array
+      items:
+        $ref: ./crm.yaml#/PipelineStage
+PipelineStage:
+  type: object
+  required:
+    - id
+    - pipelineId
+    - name
+    - sortOrder
+    - probability
+  properties:
+    id:
+      type: string
+      format: uuid
+    pipelineId:
+      type: string
+      format: uuid
+    name:
+      type: string
+      example: Negotiation
+    sortOrder:
+      type: integer
+      minimum: 1
+    probability:
+      type: number
+      format: decimal
+      minimum: 0
+      maximum: 100
+    isWonStage:
+      type: boolean
+    isLostStage:
+      type: boolean
+Opportunity:
+  type: object
+  required:
+    - id
+    - customerId
+    - ownerId
+    - stageId
+    - code
+    - title
+    - status
+  properties:
+    id:
+      type: string
+      format: uuid
+    customerId:
+      type: string
+      format: uuid
+    ownerId:
+      type: string
+      format: uuid
+    stageId:
+      type: string
+      format: uuid
+    code:
+      type: string
+      example: OPP-202607-0001
+    title:
+      type: string
+    estimatedValue:
+      type: number
+      format: decimal
+      minimum: 0
+    expectedCloseDate:
+      type: string
+      format: date
+      nullable: true
+    source:
+      type: string
+      nullable: true
+    status:
+      type: string
+      enum:
+        - open
+        - won
+        - lost
+    lostReason:
+      type: string
+      nullable: true
+CreateOpportunityRequest:
+  type: object
+  required:
+    - customerId
+    - ownerId
+    - stageId
+    - title
+  properties:
+    customerId:
+      type: string
+      format: uuid
+    ownerId:
+      type: string
+      format: uuid
+    stageId:
+      type: string
+      format: uuid
+    title:
+      type: string
+    estimatedValue:
+      type: number
+      format: decimal
+      minimum: 0
+    expectedCloseDate:
+      type: string
+      format: date
+      nullable: true
+    source:
+      type: string
+      nullable: true
+UpdateOpportunityRequest:
+  allOf:
+    - $ref: ./crm.yaml#/CreateOpportunityRequest

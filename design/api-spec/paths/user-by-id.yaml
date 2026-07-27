@@ -1,0 +1,43 @@
+parameters:
+  - name: userId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+get:
+  tags:
+    - Users
+  summary: Get user by ID
+  operationId: getUser
+  responses:
+    "200":
+      description: User returned successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/User
+    "404":
+      $ref: ../components/responses/errors.yaml#/NotFound
+patch:
+  tags:
+    - Users
+  summary: Update user
+  operationId: updateUser
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/UpdateUserRequest
+  responses:
+    "200":
+      description: User updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/User
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest
+    "404":
+      $ref: ../components/responses/errors.yaml#/NotFound

@@ -1,0 +1,51 @@
+get:
+  tags:
+    - CRM
+  summary: List opportunities
+  operationId: listOpportunities
+  parameters:
+    - name: customerId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    - name: status
+      in: query
+      schema:
+        type: string
+        enum:
+          - open
+          - won
+          - lost
+  responses:
+    "200":
+      description: Opportunities returned successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../components/schemas/index.yaml#/Opportunity
+post:
+  tags:
+    - CRM
+  summary: Create opportunity
+  operationId: createOpportunity
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/CreateOpportunityRequest
+  responses:
+    "201":
+      description: Opportunity created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/Opportunity
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest

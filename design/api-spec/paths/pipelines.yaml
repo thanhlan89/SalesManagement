@@ -1,0 +1,17 @@
+get:
+  tags:
+    - CRM
+  summary: List sales pipelines
+  operationId: listPipelines
+  responses:
+    "200":
+      description: Pipelines returned successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../components/schemas/index.yaml#/SalesPipeline

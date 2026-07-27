@@ -1,0 +1,174 @@
+Customer:
+  type: object
+  required:
+    - id
+    - code
+    - name
+    - type
+    - status
+    - createdAt
+    - updatedAt
+  properties:
+    id:
+      type: string
+      format: uuid
+    ownerId:
+      type: string
+      format: uuid
+      nullable: true
+    code:
+      type: string
+      example: CUS-000001
+    name:
+      type: string
+      example: Cong ty TNHH Minh An
+    type:
+      type: string
+      enum:
+        - individual
+        - company
+    taxCode:
+      type: string
+      nullable: true
+      example: "0312345678"
+    email:
+      type: string
+      format: email
+      nullable: true
+    phone:
+      type: string
+      nullable: true
+    status:
+      type: string
+      enum:
+        - lead
+        - active
+        - inactive
+        - blocked
+    creditLimit:
+      type: number
+      format: decimal
+      minimum: 0
+      example: 50000000
+    paymentTermDays:
+      type: integer
+      minimum: 0
+      example: 30
+    contacts:
+      type: array
+      items:
+        $ref: ./customer.yaml#/CustomerContact
+    addresses:
+      type: array
+      items:
+        $ref: ./customer.yaml#/CustomerAddress
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+CreateCustomerRequest:
+  type: object
+  required:
+    - name
+    - type
+  properties:
+    ownerId:
+      type: string
+      format: uuid
+      nullable: true
+    name:
+      type: string
+    type:
+      type: string
+      enum:
+        - individual
+        - company
+    taxCode:
+      type: string
+      nullable: true
+    email:
+      type: string
+      format: email
+      nullable: true
+    phone:
+      type: string
+      nullable: true
+    creditLimit:
+      type: number
+      format: decimal
+      minimum: 0
+    paymentTermDays:
+      type: integer
+      minimum: 0
+UpdateCustomerRequest:
+  allOf:
+    - $ref: ./customer.yaml#/CreateCustomerRequest
+CustomerContact:
+  type: object
+  required:
+    - id
+    - customerId
+    - name
+  properties:
+    id:
+      type: string
+      format: uuid
+    customerId:
+      type: string
+      format: uuid
+    name:
+      type: string
+    title:
+      type: string
+      nullable: true
+    email:
+      type: string
+      format: email
+      nullable: true
+    phone:
+      type: string
+      nullable: true
+    isPrimary:
+      type: boolean
+CustomerAddress:
+  type: object
+  required:
+    - id
+    - customerId
+    - type
+    - line1
+    - city
+    - country
+  properties:
+    id:
+      type: string
+      format: uuid
+    customerId:
+      type: string
+      format: uuid
+    type:
+      type: string
+      enum:
+        - billing
+        - shipping
+        - other
+    line1:
+      type: string
+    line2:
+      type: string
+      nullable: true
+    ward:
+      type: string
+      nullable: true
+    district:
+      type: string
+      nullable: true
+    city:
+      type: string
+    country:
+      type: string
+      example: Vietnam
+    isDefault:
+      type: boolean

@@ -1,0 +1,43 @@
+get:
+  tags:
+    - Billing
+  summary: List payments
+  operationId: listPayments
+  parameters:
+    - name: invoiceId
+      in: query
+      schema:
+        type: string
+        format: uuid
+  responses:
+    "200":
+      description: Payments returned successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../components/schemas/index.yaml#/Payment
+post:
+  tags:
+    - Billing
+  summary: Record payment
+  operationId: createPayment
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/CreatePaymentRequest
+  responses:
+    "201":
+      description: Payment recorded successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/Payment
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest

@@ -1,0 +1,147 @@
+Delivery:
+  type: object
+  required:
+    - id
+    - salesOrderId
+    - code
+    - status
+  properties:
+    id:
+      type: string
+      format: uuid
+    salesOrderId:
+      type: string
+      format: uuid
+    code:
+      type: string
+    status:
+      type: string
+      enum:
+        - pending
+        - picking
+        - shipped
+        - delivered
+        - failed
+        - cancelled
+    plannedDate:
+      type: string
+      format: date
+      nullable: true
+    carrier:
+      type: string
+      nullable: true
+    trackingNumber:
+      type: string
+      nullable: true
+Invoice:
+  type: object
+  required:
+    - id
+    - salesOrderId
+    - code
+    - status
+    - issuedDate
+    - dueDate
+    - totalAmount
+    - paidAmount
+  properties:
+    id:
+      type: string
+      format: uuid
+    salesOrderId:
+      type: string
+      format: uuid
+    code:
+      type: string
+    status:
+      type: string
+      enum:
+        - draft
+        - issued
+        - partially_paid
+        - paid
+        - overdue
+        - void
+    issuedDate:
+      type: string
+      format: date
+    dueDate:
+      type: string
+      format: date
+    totalAmount:
+      type: number
+      format: decimal
+    paidAmount:
+      type: number
+      format: decimal
+Payment:
+  type: object
+  required:
+    - id
+    - invoiceId
+    - code
+    - method
+    - amount
+    - paidDate
+    - status
+  properties:
+    id:
+      type: string
+      format: uuid
+    invoiceId:
+      type: string
+      format: uuid
+    code:
+      type: string
+    method:
+      type: string
+      enum:
+        - cash
+        - bank_transfer
+        - card
+        - other
+    amount:
+      type: number
+      format: decimal
+      minimum: 0
+    paidDate:
+      type: string
+      format: date
+    transactionRef:
+      type: string
+      nullable: true
+    status:
+      type: string
+      enum:
+        - pending
+        - confirmed
+        - failed
+        - refunded
+CreatePaymentRequest:
+  type: object
+  required:
+    - invoiceId
+    - method
+    - amount
+    - paidDate
+  properties:
+    invoiceId:
+      type: string
+      format: uuid
+    method:
+      type: string
+      enum:
+        - cash
+        - bank_transfer
+        - card
+        - other
+    amount:
+      type: number
+      format: decimal
+      minimum: 0
+    paidDate:
+      type: string
+      format: date
+    transactionRef:
+      type: string
+      nullable: true

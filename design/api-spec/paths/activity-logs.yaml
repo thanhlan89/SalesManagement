@@ -1,0 +1,32 @@
+get:
+  tags:
+    - Audit
+  summary: List activity logs
+  operationId: listActivityLogs
+  parameters:
+    - name: entityType
+      in: query
+      schema:
+        type: string
+    - name: entityId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    - name: actorId
+      in: query
+      schema:
+        type: string
+        format: uuid
+  responses:
+    "200":
+      description: Activity logs returned successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../components/schemas/index.yaml#/ActivityLog

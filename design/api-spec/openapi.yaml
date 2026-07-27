@@ -1,8 +1,19 @@
 openapi: 3.0.3
 info:
-  $ref: ./defaults/info.yaml
+  title: SalesManagement API
+  description: API specification for the SalesManagement system.
+  version: 0.1.0
+  contact:
+    name: None
+    email: None
+  license:
+    name: Unlicense
+    url: https://unlicense.org/
 servers:
-  $ref: ./defaults/servers.yaml
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+  - url: https://api.salesmanagement.example.com/api/v1
+    description: Production server
 security:
   - bearerAuth: []
 tags:
@@ -10,15 +21,144 @@ tags:
     description: Authentication and session endpoints.
   - name: Users
     description: User management endpoints.
+  - name: Customers
+    description: Customer, contact, and address management endpoints.
+  - name: CRM
+    description: Sales pipeline and opportunity endpoints.
+  - name: Products
+    description: Product catalog endpoints.
+  - name: Sales
+    description: Quote and sales order endpoints.
+  - name: Inventory
+    description: Warehouse and inventory endpoints.
+  - name: Billing
+    description: Delivery, invoice, and payment endpoints.
+  - name: Audit
+    description: Activity log endpoints.
 paths:
   /auth/login:
     $ref: ./paths/auth.yaml
   /users:
     $ref: ./paths/users.yaml
+  /users/{userId}:
+    $ref: ./paths/user-by-id.yaml
+  /customers:
+    $ref: ./paths/customers.yaml
+  /customers/{customerId}:
+    $ref: ./paths/customer-by-id.yaml
+  /pipelines:
+    $ref: ./paths/pipelines.yaml
+  /opportunities:
+    $ref: ./paths/opportunities.yaml
+  /products:
+    $ref: ./paths/products.yaml
+  /product-categories:
+    $ref: ./paths/product-categories.yaml
+  /quotes:
+    $ref: ./paths/quotes.yaml
+  /quotes/{quoteId}:
+    $ref: ./paths/quote-by-id.yaml
+  /sales-orders:
+    $ref: ./paths/sales-orders.yaml
+  /sales-orders/{salesOrderId}:
+    $ref: ./paths/sales-order-by-id.yaml
+  /warehouses:
+    $ref: ./paths/warehouses.yaml
+  /inventory-movements:
+    $ref: ./paths/inventory-movements.yaml
+  /deliveries:
+    $ref: ./paths/deliveries.yaml
+  /invoices:
+    $ref: ./paths/invoices.yaml
+  /payments:
+    $ref: ./paths/payments.yaml
+  /activity-logs:
+    $ref: ./paths/activity-logs.yaml
 components:
   securitySchemes:
-    $ref: ./components/securitySchemes.yaml
+    bearerAuth:
+      $ref: ./components/securitySchemes.yaml#/bearerAuth
   schemas:
-    $ref: ./components/schemas/index.yaml
+    User:
+      $ref: ./components/schemas/index.yaml#/User
+    CreateUserRequest:
+      $ref: ./components/schemas/index.yaml#/CreateUserRequest
+    UpdateUserRequest:
+      $ref: ./components/schemas/index.yaml#/UpdateUserRequest
+    Customer:
+      $ref: ./components/schemas/index.yaml#/Customer
+    CreateCustomerRequest:
+      $ref: ./components/schemas/index.yaml#/CreateCustomerRequest
+    UpdateCustomerRequest:
+      $ref: ./components/schemas/index.yaml#/UpdateCustomerRequest
+    CustomerContact:
+      $ref: ./components/schemas/index.yaml#/CustomerContact
+    CustomerAddress:
+      $ref: ./components/schemas/index.yaml#/CustomerAddress
+    SalesPipeline:
+      $ref: ./components/schemas/index.yaml#/SalesPipeline
+    PipelineStage:
+      $ref: ./components/schemas/index.yaml#/PipelineStage
+    Opportunity:
+      $ref: ./components/schemas/index.yaml#/Opportunity
+    CreateOpportunityRequest:
+      $ref: ./components/schemas/index.yaml#/CreateOpportunityRequest
+    UpdateOpportunityRequest:
+      $ref: ./components/schemas/index.yaml#/UpdateOpportunityRequest
+    ProductCategory:
+      $ref: ./components/schemas/index.yaml#/ProductCategory
+    Product:
+      $ref: ./components/schemas/index.yaml#/Product
+    CreateProductRequest:
+      $ref: ./components/schemas/index.yaml#/CreateProductRequest
+    UpdateProductRequest:
+      $ref: ./components/schemas/index.yaml#/UpdateProductRequest
+    Quote:
+      $ref: ./components/schemas/index.yaml#/Quote
+    CreateQuoteRequest:
+      $ref: ./components/schemas/index.yaml#/CreateQuoteRequest
+    UpdateQuoteRequest:
+      $ref: ./components/schemas/index.yaml#/UpdateQuoteRequest
+    SalesOrder:
+      $ref: ./components/schemas/index.yaml#/SalesOrder
+    CreateSalesOrderRequest:
+      $ref: ./components/schemas/index.yaml#/CreateSalesOrderRequest
+    UpdateSalesOrderRequest:
+      $ref: ./components/schemas/index.yaml#/UpdateSalesOrderRequest
+    Warehouse:
+      $ref: ./components/schemas/index.yaml#/Warehouse
+    InventoryBalance:
+      $ref: ./components/schemas/index.yaml#/InventoryBalance
+    InventoryMovement:
+      $ref: ./components/schemas/index.yaml#/InventoryMovement
+    CreateInventoryMovementRequest:
+      $ref: ./components/schemas/index.yaml#/CreateInventoryMovementRequest
+    Delivery:
+      $ref: ./components/schemas/index.yaml#/Delivery
+    Invoice:
+      $ref: ./components/schemas/index.yaml#/Invoice
+    Payment:
+      $ref: ./components/schemas/index.yaml#/Payment
+    CreatePaymentRequest:
+      $ref: ./components/schemas/index.yaml#/CreatePaymentRequest
+    ActivityLog:
+      $ref: ./components/schemas/index.yaml#/ActivityLog
+    PaginationMeta:
+      $ref: ./components/schemas/index.yaml#/PaginationMeta
+    LoginRequest:
+      $ref: ./components/schemas/index.yaml#/LoginRequest
+    LoginResponse:
+      $ref: ./components/schemas/index.yaml#/LoginResponse
+    ErrorResponse:
+      $ref: ./components/schemas/index.yaml#/ErrorResponse
   responses:
-    $ref: ./components/responses/errors.yaml
+    BadRequest:
+      $ref: ./components/responses/errors.yaml#/BadRequest
+    Unauthorized:
+      $ref: ./components/responses/errors.yaml#/Unauthorized
+    Forbidden:
+      $ref: ./components/responses/errors.yaml#/Forbidden
+    NotFound:
+      $ref: ./components/responses/errors.yaml#/NotFound
+    InternalServerError:
+      $ref: ./components/responses/errors.yaml#/InternalServerError

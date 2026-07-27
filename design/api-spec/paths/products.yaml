@@ -1,0 +1,51 @@
+get:
+  tags:
+    - Products
+  summary: List products
+  operationId: listProducts
+  parameters:
+    - name: categoryId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    - name: search
+      in: query
+      schema:
+        type: string
+    - name: isActive
+      in: query
+      schema:
+        type: boolean
+  responses:
+    "200":
+      description: Products returned successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../components/schemas/index.yaml#/Product
+post:
+  tags:
+    - Products
+  summary: Create product
+  operationId: createProduct
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/CreateProductRequest
+  responses:
+    "201":
+      description: Product created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/Product
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest

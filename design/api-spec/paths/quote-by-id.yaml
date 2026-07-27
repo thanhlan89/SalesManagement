@@ -1,0 +1,43 @@
+parameters:
+  - name: quoteId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+get:
+  tags:
+    - Sales
+  summary: Get quote by ID
+  operationId: getQuote
+  responses:
+    "200":
+      description: Quote returned successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/Quote
+    "404":
+      $ref: ../components/responses/errors.yaml#/NotFound
+patch:
+  tags:
+    - Sales
+  summary: Update quote
+  operationId: updateQuote
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/UpdateQuoteRequest
+  responses:
+    "200":
+      description: Quote updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/Quote
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest
+    "404":
+      $ref: ../components/responses/errors.yaml#/NotFound

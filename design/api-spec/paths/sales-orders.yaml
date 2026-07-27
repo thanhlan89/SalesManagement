@@ -1,0 +1,53 @@
+get:
+  tags:
+    - Sales
+  summary: List sales orders
+  operationId: listSalesOrders
+  parameters:
+    - name: customerId
+      in: query
+      schema:
+        type: string
+        format: uuid
+    - name: status
+      in: query
+      schema:
+        type: string
+        enum:
+          - draft
+          - confirmed
+          - processing
+          - fulfilled
+          - cancelled
+  responses:
+    "200":
+      description: Sales orders returned successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../components/schemas/index.yaml#/SalesOrder
+post:
+  tags:
+    - Sales
+  summary: Create sales order
+  operationId: createSalesOrder
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/CreateSalesOrderRequest
+  responses:
+    "201":
+      description: Sales order created successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/SalesOrder
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest

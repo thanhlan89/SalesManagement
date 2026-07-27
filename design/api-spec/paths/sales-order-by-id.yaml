@@ -1,0 +1,43 @@
+parameters:
+  - name: salesOrderId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+get:
+  tags:
+    - Sales
+  summary: Get sales order by ID
+  operationId: getSalesOrder
+  responses:
+    "200":
+      description: Sales order returned successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/SalesOrder
+    "404":
+      $ref: ../components/responses/errors.yaml#/NotFound
+patch:
+  tags:
+    - Sales
+  summary: Update sales order
+  operationId: updateSalesOrder
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/UpdateSalesOrderRequest
+  responses:
+    "200":
+      description: Sales order updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/SalesOrder
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest
+    "404":
+      $ref: ../components/responses/errors.yaml#/NotFound

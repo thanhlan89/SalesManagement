@@ -4,6 +4,66 @@ CreateUserRequest:
   $ref: ./user.yaml#/CreateUserRequest
 UpdateUserRequest:
   $ref: ./user.yaml#/UpdateUserRequest
+Customer:
+  $ref: ./customer.yaml#/Customer
+CreateCustomerRequest:
+  $ref: ./customer.yaml#/CreateCustomerRequest
+UpdateCustomerRequest:
+  $ref: ./customer.yaml#/UpdateCustomerRequest
+CustomerContact:
+  $ref: ./customer.yaml#/CustomerContact
+CustomerAddress:
+  $ref: ./customer.yaml#/CustomerAddress
+SalesPipeline:
+  $ref: ./crm.yaml#/SalesPipeline
+PipelineStage:
+  $ref: ./crm.yaml#/PipelineStage
+Opportunity:
+  $ref: ./crm.yaml#/Opportunity
+CreateOpportunityRequest:
+  $ref: ./crm.yaml#/CreateOpportunityRequest
+UpdateOpportunityRequest:
+  $ref: ./crm.yaml#/UpdateOpportunityRequest
+ProductCategory:
+  $ref: ./product.yaml#/ProductCategory
+Product:
+  $ref: ./product.yaml#/Product
+CreateProductRequest:
+  $ref: ./product.yaml#/CreateProductRequest
+UpdateProductRequest:
+  $ref: ./product.yaml#/UpdateProductRequest
+Quote:
+  $ref: ./sales.yaml#/Quote
+CreateQuoteRequest:
+  $ref: ./sales.yaml#/CreateQuoteRequest
+UpdateQuoteRequest:
+  $ref: ./sales.yaml#/UpdateQuoteRequest
+SalesOrder:
+  $ref: ./sales.yaml#/SalesOrder
+CreateSalesOrderRequest:
+  $ref: ./sales.yaml#/CreateSalesOrderRequest
+UpdateSalesOrderRequest:
+  $ref: ./sales.yaml#/UpdateSalesOrderRequest
+Warehouse:
+  $ref: ./inventory.yaml#/Warehouse
+InventoryBalance:
+  $ref: ./inventory.yaml#/InventoryBalance
+InventoryMovement:
+  $ref: ./inventory.yaml#/InventoryMovement
+CreateInventoryMovementRequest:
+  $ref: ./inventory.yaml#/CreateInventoryMovementRequest
+Delivery:
+  $ref: ./billing.yaml#/Delivery
+Invoice:
+  $ref: ./billing.yaml#/Invoice
+Payment:
+  $ref: ./billing.yaml#/Payment
+CreatePaymentRequest:
+  $ref: ./billing.yaml#/CreatePaymentRequest
+ActivityLog:
+  $ref: ./audit.yaml#/ActivityLog
+PaginationMeta:
+  $ref: ./common.yaml#/PaginationMeta
 LoginRequest:
   type: object
   required:

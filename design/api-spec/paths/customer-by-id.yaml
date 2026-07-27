@@ -1,0 +1,43 @@
+parameters:
+  - name: customerId
+    in: path
+    required: true
+    schema:
+      type: string
+      format: uuid
+get:
+  tags:
+    - Customers
+  summary: Get customer by ID
+  operationId: getCustomer
+  responses:
+    "200":
+      description: Customer returned successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/Customer
+    "404":
+      $ref: ../components/responses/errors.yaml#/NotFound
+patch:
+  tags:
+    - Customers
+  summary: Update customer
+  operationId: updateCustomer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/index.yaml#/UpdateCustomerRequest
+  responses:
+    "200":
+      description: Customer updated successfully.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/index.yaml#/Customer
+    "400":
+      $ref: ../components/responses/errors.yaml#/BadRequest
+    "404":
+      $ref: ../components/responses/errors.yaml#/NotFound

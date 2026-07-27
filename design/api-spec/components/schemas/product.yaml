@@ -1,0 +1,103 @@
+ProductCategory:
+  type: object
+  required:
+    - id
+    - name
+    - isActive
+  properties:
+    id:
+      type: string
+      format: uuid
+    parentId:
+      type: string
+      format: uuid
+      nullable: true
+    name:
+      type: string
+    description:
+      type: string
+      nullable: true
+    isActive:
+      type: boolean
+Product:
+  type: object
+  required:
+    - id
+    - sku
+    - name
+    - unit
+    - listPrice
+    - isActive
+  properties:
+    id:
+      type: string
+      format: uuid
+    categoryId:
+      type: string
+      format: uuid
+      nullable: true
+    sku:
+      type: string
+      example: PRD-000001
+    name:
+      type: string
+    unit:
+      type: string
+      example: box
+    listPrice:
+      type: number
+      format: decimal
+      minimum: 0
+    costPrice:
+      type: number
+      format: decimal
+      minimum: 0
+      nullable: true
+    taxRate:
+      type: number
+      format: decimal
+      minimum: 0
+      maximum: 100
+    reorderLevel:
+      type: integer
+      minimum: 0
+    isActive:
+      type: boolean
+CreateProductRequest:
+  type: object
+  required:
+    - sku
+    - name
+    - unit
+    - listPrice
+  properties:
+    categoryId:
+      type: string
+      format: uuid
+      nullable: true
+    sku:
+      type: string
+    name:
+      type: string
+    unit:
+      type: string
+    listPrice:
+      type: number
+      format: decimal
+      minimum: 0
+    costPrice:
+      type: number
+      format: decimal
+      minimum: 0
+      nullable: true
+    taxRate:
+      type: number
+      format: decimal
+      minimum: 0
+      maximum: 100
+    reorderLevel:
+      type: integer
+      minimum: 0
+UpdateProductRequest:
+  allOf:
+    - $ref: ./product.yaml#/CreateProductRequest

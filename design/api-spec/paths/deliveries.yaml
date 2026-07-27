@@ -1,0 +1,23 @@
+get:
+  tags:
+    - Billing
+  summary: List deliveries
+  operationId: listDeliveries
+  parameters:
+    - name: salesOrderId
+      in: query
+      schema:
+        type: string
+        format: uuid
+  responses:
+    "200":
+      description: Deliveries returned successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../components/schemas/index.yaml#/Delivery

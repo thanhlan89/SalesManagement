@@ -1,0 +1,17 @@
+get:
+  tags:
+    - Inventory
+  summary: List warehouses
+  operationId: listWarehouses
+  responses:
+    "200":
+      description: Warehouses returned successfully.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: array
+                items:
+                  $ref: ../components/schemas/index.yaml#/Warehouse

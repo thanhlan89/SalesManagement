@@ -1,0 +1,37 @@
+ActivityLog:
+  type: object
+  required:
+    - id
+    - actorId
+    - entityType
+    - entityId
+    - action
+    - createdAt
+  properties:
+    id:
+      type: string
+      format: uuid
+    actorId:
+      type: string
+      format: uuid
+    entityType:
+      type: string
+      example: sales_order
+    entityId:
+      type: string
+      format: uuid
+    action:
+      type: string
+      example: confirmed
+    ipAddress:
+      type: string
+      nullable: true
+    userAgent:
+      type: string
+      nullable: true
+    metadata:
+      type: object
+      additionalProperties: true
+    createdAt:
+      type: string
+      format: date-time
