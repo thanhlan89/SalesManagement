@@ -10,12 +10,27 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   toPublicUser(user: User) {
-    const { passwordHash: _passwordHash, ...publicUser } = user;
+    const { passwordHash: _passwordHash, refreshTokenHash: _refreshTokenHash, ...publicUser } = user;
     return publicUser;
   }
 
   async findByEmailWithPassword(email: string) {
     return this.prisma.user.findUnique({ where: { email } });
+  }
+
+  async findByIdWithRefreshHash(id: string) {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async setRefreshTokenHash(id: string, refreshToken: string | null) {
+    const refreshTokenHash = refreshToken
+      ? await bcrypt.hash(refreshToken, 12)
+      : null;
+
+    await this.prisma.user.update({
+      where: { id },
+      data: { refreshTokenHash },
+    });
   }
 
   async list() {

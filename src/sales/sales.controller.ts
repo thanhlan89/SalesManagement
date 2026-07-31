@@ -1,12 +1,15 @@
 import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 import { RequestUser } from '../common/types/request-user.type';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { CreateSalesOrderDto } from './dto/create-sales-order.dto';
 import { SalesService } from './sales.service';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
 export class SalesController {
   constructor(private readonly salesService: SalesService) {}
