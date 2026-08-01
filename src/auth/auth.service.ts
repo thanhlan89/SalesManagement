@@ -105,14 +105,14 @@ export class AuthService {
 
     const accessToken = await this.jwtService.signAsync(payload, {
       secret: signerSecret,
-      expiresIn: accessTokenExpiry,
+      expiresIn: accessTokenExpiry as any,
     });
 
     const refreshToken = await this.jwtService.signAsync(
       { ...payload, type: 'refresh' },
       {
         secret: refreshSecret,
-        expiresIn: refreshTokenExpiry,
+        expiresIn: refreshTokenExpiry as any,
       },
     );
 

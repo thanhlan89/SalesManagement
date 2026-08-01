@@ -3,7 +3,7 @@ WORKDIR /app
 
 # Install deps
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev
+RUN npm ci
 
 # Copy source + prisma schema
 COPY prisma ./prisma
