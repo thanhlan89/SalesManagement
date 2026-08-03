@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -16,8 +16,12 @@ export class UsersController {
 
   @Get()
   @Roles(UserRole.admin)
-  list() {
-    return this.usersService.list();
+  list(
+    @Query('search') search?: string,
+    @Query('page', new DefaultValuePipe('1'), ParseIntPipe) page = 1,
+    @Query('limit', new DefaultValuePipe('20'), ParseIntPipe) limit = 20,
+  ) {
+    return this.usersService.list(search, page, limit);
   }
 
   @Post()
