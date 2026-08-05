@@ -7,20 +7,57 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(search?: string, page = 1, limit = 20) {
-    const where = search
-      ? {
-          OR: [
-            { sku: { contains: search, mode: 'insensitive' } },
-            { name: { contains: search, mode: 'insensitive' } },
-          ],
-        }
-      : undefined;
+  async list(
+    search?: string,
+    page = 1,
+    limit = 20,
+    categoryId?: string,
+    minPrice?: number,
+    maxPrice?: number,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+  ) {
+    const where: Record<string, any> = {};
 
-    const total = await this.prisma.product.count({ where });
+    if (search) {
+      where.OR = [
+        { sku: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.listPrice = {};
+      if (minPrice !== undefined && !Number.isNaN(minPrice)) {
+        where.listPrice.gte = minPrice;
+      }
+      if (maxPrice !== undefined && !Number.isNaN(maxPrice)) {
+        where.listPrice.lte = maxPrice;
+      }
+    }
+
+    const safeSortFields = new Set([
+      'sku',
+      'name',
+      'listPrice',
+      'costPrice',
+      'taxRate',
+      'createdAt',
+      'updatedAt',
+    ]);
+    const normalizedSortBy = safeSortFields.has(sortBy) ? sortBy : 'createdAt';
+    const normalizedSortOrder = sortOrder === 'asc' ? 'asc' : 'desc';
+
+    const total = await this.prisma.product.count({
+      where: Object.keys(where).length ? where : undefined,
+    });
     const data = await this.prisma.product.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
+      where: Object.keys(where).length ? where : undefined,
+      orderBy: { [normalizedSortBy]: normalizedSortOrder },
       skip: (page - 1) * limit,
       take: limit,
     });
@@ -30,6 +67,11 @@ export class ProductsService {
       total,
       page,
       limit,
+      sortBy: normalizedSortBy,
+      sortOrder: normalizedSortOrder,
+      categoryId,
+      minPrice,
+      maxPrice,
     };
   }
 

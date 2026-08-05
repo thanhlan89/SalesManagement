@@ -15,16 +15,28 @@ export class ProductsController {
   @Get()
   list(
     @Query('search') search?: string,
+    @Query('categoryId') categoryId?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder?: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
     const pageNumber = page ? parseInt(page, 10) : 1;
     const limitNumber = limit ? parseInt(limit, 10) : 20;
+    const minPriceNumber = minPrice ? parseFloat(minPrice) : undefined;
+    const maxPriceNumber = maxPrice ? parseFloat(maxPrice) : undefined;
 
     return this.productsService.list(
       search,
       Number.isNaN(pageNumber) ? 1 : Math.max(pageNumber, 1),
       Number.isNaN(limitNumber) ? 20 : Math.max(limitNumber, 1),
+      categoryId,
+      minPriceNumber,
+      maxPriceNumber,
+      sortBy,
+      sortOrder,
     );
   }
 
