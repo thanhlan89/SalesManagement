@@ -7,19 +7,30 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(search?: string) {
+  async list(search?: string, page = 1, limit = 20) {
+    const where = search
+      ? {
+          OR: [
+            { sku: { contains: search, mode: 'insensitive' } },
+            { name: { contains: search, mode: 'insensitive' } },
+          ],
+        }
+      : undefined;
+
+    const total = await this.prisma.product.count({ where });
     const data = await this.prisma.product.findMany({
-      where: search
-        ? {
-            OR: [
-              { sku: { contains: search, mode: 'insensitive' } },
-              { name: { contains: search, mode: 'insensitive' } },
-            ],
-          }
-        : undefined,
+      where,
       orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
-    return { data };
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   create(dto: CreateProductDto) {
@@ -37,5 +48,10 @@ export class ProductsService {
   async update(id: string, dto: UpdateProductDto) {
     await this.get(id);
     return this.prisma.product.update({ where: { id }, data: dto });
+  }
+
+  async remove(id: string) {
+    await this.get(id);
+    return this.prisma.product.delete({ where: { id } });
   }
 }
