@@ -1,9 +1,11 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 import { CreateInventoryMovementDto } from './dto/create-inventory-movement.dto';
+import { CreateWarehouseDto } from './dto/create-warehouse.dto';
+import { UpdateWarehouseDto } from './dto/update-warehouse.dto';
 import { InventoryService } from './inventory.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -16,9 +18,27 @@ export class InventoryController {
     return this.inventoryService.listWarehouses();
   }
 
+  @Post('warehouses')
+  createWarehouse(@Body() dto: CreateWarehouseDto) {
+    return this.inventoryService.createWarehouse(dto);
+  }
+
   @Get('warehouses/:id')
   getWarehouse(@Param('id') id: string) {
     return this.inventoryService.getWarehouse(id);
+  }
+
+  @Patch('warehouses/:id')
+  updateWarehouse(
+    @Param('id') id: string,
+    @Body() dto: UpdateWarehouseDto,
+  ) {
+    return this.inventoryService.updateWarehouse(id, dto);
+  }
+
+  @Delete('warehouses/:id')
+  removeWarehouse(@Param('id') id: string) {
+    return this.inventoryService.removeWarehouse(id);
   }
 
   @Get('inventory-balances')
