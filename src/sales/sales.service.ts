@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { CreateQuoteDto, CreateQuoteItemDto } from './dto/create-quote.dto';
 import { CreateSalesOrderDto, CreateSalesOrderItemDto } from './dto/create-sales-order.dto';
+import { UpdateQuoteDto } from './dto/update-quote.dto';
+import { UpdateSalesOrderDto } from './dto/update-sales-order.dto';
 
 @Injectable()
 export class SalesService {
@@ -48,6 +50,37 @@ export class SalesService {
     return quote;
   }
 
+  async updateQuote(id: string, dto: UpdateQuoteDto) {
+    const quote = await this.getQuote(id);
+    return this.prisma.quote.update({
+      where: { id },
+      data: {
+        customerId: dto.customerId ?? quote.customerId,
+        opportunityId: dto.opportunityId ?? quote.opportunityId,
+        status: dto.status ?? quote.status,
+        validUntil: dto.validUntil ? new Date(dto.validUntil) : quote.validUntil,
+        note: dto.note ?? quote.note,
+        ...this.calculateTotals(dto.items ?? quote.items),
+        items: dto.items
+          ? {
+              deleteMany: {},
+              create: dto.items.map((item) => ({
+                ...item,
+                taxAmount: 0,
+                lineTotal: this.calculateLineTotal(item),
+              })),
+            }
+          : undefined,
+      },
+      include: { items: true },
+    });
+  }
+
+  async removeQuote(id: string) {
+    await this.getQuote(id);
+    return this.prisma.quote.delete({ where: { id } });
+  }
+
   listSalesOrders() {
     return this.prisma.salesOrder.findMany({
       include: { items: true },
@@ -91,6 +124,42 @@ export class SalesService {
       throw new NotFoundException('Sales order not found');
     }
     return salesOrder;
+  }
+
+  async updateSalesOrder(id: string, dto: UpdateSalesOrderDto) {
+    const salesOrder = await this.getSalesOrder(id);
+    return this.prisma.salesOrder.update({
+      where: { id },
+      data: {
+        customerId: dto.customerId ?? salesOrder.customerId,
+        quoteId: dto.quoteId ?? salesOrder.quoteId,
+        billingAddressId:
+          dto.billingAddressId ?? salesOrder.billingAddressId,
+        shippingAddressId:
+          dto.shippingAddressId ?? salesOrder.shippingAddressId,
+        expectedDeliveryDate: dto.expectedDeliveryDate
+          ? new Date(dto.expectedDeliveryDate)
+          : salesOrder.expectedDeliveryDate,
+        note: dto.note ?? salesOrder.note,
+        ...this.calculateTotals(dto.items ?? salesOrder.items),
+        items: dto.items
+          ? {
+              deleteMany: {},
+              create: dto.items.map((item) => ({
+                ...item,
+                taxAmount: 0,
+                lineTotal: this.calculateLineTotal(item),
+              })),
+            }
+          : undefined,
+      },
+      include: { items: true, deliveries: true, invoice: true },
+    });
+  }
+
+  async removeSalesOrder(id: string) {
+    await this.getSalesOrder(id);
+    return this.prisma.salesOrder.delete({ where: { id } });
   }
 
   private calculateTotals(items: Array<CreateQuoteItemDto | CreateSalesOrderItemDto>) {
