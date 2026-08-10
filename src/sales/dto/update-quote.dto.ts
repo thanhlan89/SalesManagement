@@ -1,6 +1,6 @@
-import { IsDateString, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
+import { IsArray, IsDateString, IsEnum, IsInt, IsNumber, IsOptional, IsString, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateQuoteItemDto } from './create-quote.dto';
+import { CreateQuoteDto, CreateQuoteItemDto } from './create-quote.dto';
 import { QuoteStatus } from '@prisma/client';
 import { PartialType } from '@nestjs/mapped-types';
 

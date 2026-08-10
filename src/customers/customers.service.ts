@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 
@@ -8,7 +9,7 @@ export class CustomersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async list(search?: string, page = 1, limit = 20) {
-    const where = search
+    const where: Prisma.CustomerWhereInput | undefined = search
       ? {
           OR: [
             { code: { contains: search, mode: 'insensitive' } },

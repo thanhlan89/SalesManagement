@@ -52,6 +52,15 @@ export class SalesService {
 
   async updateQuote(id: string, dto: UpdateQuoteDto) {
     const quote = await this.getQuote(id);
+    const totals = dto.items
+      ? this.calculateTotals(dto.items)
+      : {
+          subtotal: quote.subtotal,
+          discountAmount: quote.discountAmount,
+          taxAmount: quote.taxAmount,
+          totalAmount: quote.totalAmount,
+        };
+
     return this.prisma.quote.update({
       where: { id },
       data: {
@@ -60,7 +69,7 @@ export class SalesService {
         status: dto.status ?? quote.status,
         validUntil: dto.validUntil ? new Date(dto.validUntil) : quote.validUntil,
         note: dto.note ?? quote.note,
-        ...this.calculateTotals(dto.items ?? quote.items),
+        ...totals,
         items: dto.items
           ? {
               deleteMany: {},
@@ -128,6 +137,15 @@ export class SalesService {
 
   async updateSalesOrder(id: string, dto: UpdateSalesOrderDto) {
     const salesOrder = await this.getSalesOrder(id);
+    const totals = dto.items
+      ? this.calculateTotals(dto.items)
+      : {
+          subtotal: salesOrder.subtotal,
+          discountAmount: salesOrder.discountAmount,
+          taxAmount: salesOrder.taxAmount,
+          totalAmount: salesOrder.totalAmount,
+        };
+
     return this.prisma.salesOrder.update({
       where: { id },
       data: {
@@ -141,7 +159,7 @@ export class SalesService {
           ? new Date(dto.expectedDeliveryDate)
           : salesOrder.expectedDeliveryDate,
         note: dto.note ?? salesOrder.note,
-        ...this.calculateTotals(dto.items ?? salesOrder.items),
+        ...totals,
         items: dto.items
           ? {
               deleteMany: {},
