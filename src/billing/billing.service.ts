@@ -330,7 +330,7 @@ export class BillingService {
     );
 
     // Update invoice status
-    let newStatus = InvoiceStatus.issued;
+    let newStatus: InvoiceStatus = InvoiceStatus.issued;
     if (totalPaid === payment.invoice.totalAmount.toNumber()) {
       newStatus = InvoiceStatus.paid;
     } else if (totalPaid > 0) {
