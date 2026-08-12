@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { QuoteItem, SalesOrderItem } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import { CreateQuoteDto, CreateQuoteItemDto } from './dto/create-quote.dto';
 import { CreateSalesOrderDto, CreateSalesOrderItemDto } from './dto/create-sales-order.dto';
@@ -52,15 +53,6 @@ export class SalesService {
 
   async updateQuote(id: string, dto: UpdateQuoteDto) {
     const quote = await this.getQuote(id);
-    const totals = dto.items
-      ? this.calculateTotals(dto.items)
-      : {
-          subtotal: quote.subtotal,
-          discountAmount: quote.discountAmount,
-          taxAmount: quote.taxAmount,
-          totalAmount: quote.totalAmount,
-        };
-
     return this.prisma.quote.update({
       where: { id },
       data: {
@@ -69,7 +61,7 @@ export class SalesService {
         status: dto.status ?? quote.status,
         validUntil: dto.validUntil ? new Date(dto.validUntil) : quote.validUntil,
         note: dto.note ?? quote.note,
-        ...totals,
+        ...this.calculateTotals(dto.items ?? quote.items),
         items: dto.items
           ? {
               deleteMany: {},
@@ -137,15 +129,6 @@ export class SalesService {
 
   async updateSalesOrder(id: string, dto: UpdateSalesOrderDto) {
     const salesOrder = await this.getSalesOrder(id);
-    const totals = dto.items
-      ? this.calculateTotals(dto.items)
-      : {
-          subtotal: salesOrder.subtotal,
-          discountAmount: salesOrder.discountAmount,
-          taxAmount: salesOrder.taxAmount,
-          totalAmount: salesOrder.totalAmount,
-        };
-
     return this.prisma.salesOrder.update({
       where: { id },
       data: {
@@ -159,7 +142,7 @@ export class SalesService {
           ? new Date(dto.expectedDeliveryDate)
           : salesOrder.expectedDeliveryDate,
         note: dto.note ?? salesOrder.note,
-        ...totals,
+        ...this.calculateTotals(dto.items ?? salesOrder.items),
         items: dto.items
           ? {
               deleteMany: {},
@@ -180,22 +163,41 @@ export class SalesService {
     return this.prisma.salesOrder.delete({ where: { id } });
   }
 
-  private calculateTotals(items: Array<CreateQuoteItemDto | CreateSalesOrderItemDto>) {
-    const subtotal = items.reduce(
-      (sum, item) => sum + item.quantity * item.unitPrice,
-      0,
-    );
-    const discountAmount = items.reduce(
-      (sum, item) => sum + (item.discountAmount ?? 0),
-      0,
-    );
+  private calculateTotals(
+    items: Array<
+      | CreateQuoteItemDto
+      | CreateSalesOrderItemDto
+      | QuoteItem
+      | SalesOrderItem
+    >,
+  ) {
+    const subtotal = items.reduce((sum, item) => {
+      return (
+        sum + item.quantity * this.toNumber(item.unitPrice)
+      );
+    }, 0);
+    const discountAmount = items.reduce((sum, item) => {
+      return sum + this.toNumber(item.discountAmount);
+    }, 0);
     const taxAmount = 0;
     const totalAmount = subtotal - discountAmount + taxAmount;
 
     return { subtotal, discountAmount, taxAmount, totalAmount };
   }
 
-  private calculateLineTotal(item: CreateQuoteItemDto | CreateSalesOrderItemDto) {
-    return item.quantity * item.unitPrice - (item.discountAmount ?? 0);
+  private calculateLineTotal(
+    item: CreateQuoteItemDto | CreateSalesOrderItemDto | QuoteItem | SalesOrderItem,
+  ) {
+    return (
+      item.quantity * this.toNumber(item.unitPrice) -
+      this.toNumber(item.discountAmount)
+    );
+  }
+
+  private toNumber(value: number | { toNumber(): number } | null | undefined) {
+    if (value === null || value === undefined) {
+      return 0;
+    }
+    return typeof value === 'number' ? value : value.toNumber();
   }
 }
