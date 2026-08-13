@@ -2,6 +2,11 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import Login from './pages/Login';
 import MainLayout from './components/MainLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import EmployeesPage from './pages/EmployeesPage';
+import ProductsPage from './pages/ProductsPage';
+import WarehousePage from './pages/WarehousePage';
+import SalesPage from './pages/SalesPage';
+import AccountingPage from './pages/AccountingPage';
 
 function App() {
   return (
@@ -12,11 +17,11 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route path="/" element={<Navigate to="/employees" replace />} />
-            <Route path="/employees" element={<div className="rounded-3xl bg-white p-8 shadow-sm">Nhân sự</div>} />
-            <Route path="/products" element={<div className="rounded-3xl bg-white p-8 shadow-sm">Sản phẩm</div>} />
-            <Route path="/warehouse" element={<div className="rounded-3xl bg-white p-8 shadow-sm">Kho bãi</div>} />
-            <Route path="/sales" element={<div className="rounded-3xl bg-white p-8 shadow-sm">Bán hàng</div>} />
-            <Route path="/accounting" element={<div className="rounded-3xl bg-white p-8 shadow-sm">Kế toán</div>} />
+            <Route path="/employees" element={<EmployeesPage />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/warehouse" element={<WarehousePage />} />
+            <Route path="/sales" element={<SalesPage />} />
+            <Route path="/accounting" element={<AccountingPage />} />
           </Route>
         </Route>
       </Routes>
