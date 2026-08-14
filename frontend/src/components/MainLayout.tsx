@@ -1,19 +1,21 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import useAuth from '../hooks/useAuth';
 
 const navItems = [
+  { to: '/dashboard', label: 'Dashboard', icon: '📊' },
   { to: '/employees', label: 'Nhân sự', icon: '👥' },
   { to: '/products', label: 'Sản phẩm', icon: '📦' },
-  { to: '/warehouse', label: 'Kho bãi', icon: '🏬' },
+  { to: '/warehouse', label: 'Kho bãi', icon: '🏢' },
   { to: '/sales', label: 'Bán hàng', icon: '🛒' },
-  { to: '/accounting', label: 'Kế toán', icon: '🧾' },
+  { to: '/accounting', label: 'Kế toán', icon: '💰' },
 ];
 
 function MainLayout() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('accessToken');
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

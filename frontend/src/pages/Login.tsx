@@ -1,9 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
+import useAuth from '../hooks/useAuth';
 
 function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -15,21 +16,8 @@ function Login() {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/auth/login', {
-        email,
-        password,
-      });
-
-      const token = response.data?.access_token ?? response.data?.accessToken;
-
-      if (token) {
-        localStorage.setItem('access_token', token);
-        localStorage.setItem('accessToken', token);
-        navigate('/employees');
-        return;
-      }
-
-      setError('Đăng nhập không trả về token hợp lệ.');
+      await login({ email, password });
+      navigate('/dashboard');
     } catch (err) {
       setError('Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.');
     } finally {
