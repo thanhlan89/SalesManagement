@@ -4,22 +4,20 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   helper?: string;
 }
 
-export function Input({ label, error, helper, className, ...props }: InputProps) {
+export function Input({ label, error, helper, className = '', ...props }: InputProps) {
   return (
     <div className="space-y-2">
-      {label && (
-        <label className="block text-sm font-medium text-slate-700">{label}</label>
-      )}
+      {label ? <label className="block text-sm font-medium text-slate-700">{label}</label> : null}
       <input
         {...props}
-        className={`w-full rounded-2xl border bg-slate-50 px-4 py-3 text-slate-900 outline-none transition ${
+        className={`w-full rounded-lg border bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-slate-400 ${
           error
-            ? 'border-rose-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-100'
+            ? 'border-rose-300 focus:border-rose-500 focus:ring-4 focus:ring-rose-100'
             : 'border-slate-200 focus:border-sky-500 focus:ring-4 focus:ring-sky-100'
         } ${className}`}
       />
-      {error && <p className="text-sm font-medium text-rose-600">{error}</p>}
-      {helper && <p className="text-sm text-slate-500">{helper}</p>}
+      {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
+      {helper ? <p className="text-sm text-slate-500">{helper}</p> : null}
     </div>
   );
 }
@@ -30,17 +28,15 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options: { value: string; label: string }[];
 }
 
-export function Select({ label, error, options, className, ...props }: SelectProps) {
+export function Select({ label, error, options, className = '', ...props }: SelectProps) {
   return (
     <div className="space-y-2">
-      {label && (
-        <label className="block text-sm font-medium text-slate-700">{label}</label>
-      )}
+      {label ? <label className="block text-sm font-medium text-slate-700">{label}</label> : null}
       <select
         {...props}
-        className={`w-full rounded-2xl border bg-slate-50 px-4 py-3 text-slate-900 outline-none transition ${
+        className={`w-full rounded-lg border bg-white px-4 py-3 text-slate-900 outline-none transition ${
           error
-            ? 'border-rose-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-100'
+            ? 'border-rose-300 focus:border-rose-500 focus:ring-4 focus:ring-rose-100'
             : 'border-slate-200 focus:border-sky-500 focus:ring-4 focus:ring-sky-100'
         } ${className}`}
       >
@@ -51,7 +47,7 @@ export function Select({ label, error, options, className, ...props }: SelectPro
           </option>
         ))}
       </select>
-      {error && <p className="text-sm font-medium text-rose-600">{error}</p>}
+      {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
     </div>
   );
 }
@@ -61,21 +57,19 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   error?: string;
 }
 
-export function TextArea({ label, error, className, ...props }: TextAreaProps) {
+export function TextArea({ label, error, className = '', ...props }: TextAreaProps) {
   return (
     <div className="space-y-2">
-      {label && (
-        <label className="block text-sm font-medium text-slate-700">{label}</label>
-      )}
+      {label ? <label className="block text-sm font-medium text-slate-700">{label}</label> : null}
       <textarea
         {...props}
-        className={`w-full rounded-2xl border bg-slate-50 px-4 py-3 text-slate-900 outline-none transition ${
+        className={`w-full rounded-lg border bg-white px-4 py-3 text-slate-900 outline-none transition ${
           error
-            ? 'border-rose-200 focus:border-rose-500 focus:ring-4 focus:ring-rose-100'
+            ? 'border-rose-300 focus:border-rose-500 focus:ring-4 focus:ring-rose-100'
             : 'border-slate-200 focus:border-sky-500 focus:ring-4 focus:ring-sky-100'
         } ${className}`}
       />
-      {error && <p className="text-sm font-medium text-rose-600">{error}</p>}
+      {error ? <p className="text-sm font-medium text-rose-600">{error}</p> : null}
     </div>
   );
 }
@@ -92,26 +86,26 @@ export function Button({
   isLoading = false,
   children,
   disabled,
-  className,
+  className = '',
   ...props
 }: ButtonProps) {
   const variantClasses = {
     primary: 'bg-sky-500 text-white hover:bg-sky-600 disabled:bg-sky-300',
-    secondary: 'bg-slate-200 text-slate-900 hover:bg-slate-300 disabled:bg-slate-100',
+    secondary: 'bg-slate-100 text-slate-800 hover:bg-slate-200 disabled:bg-slate-50',
     danger: 'bg-rose-500 text-white hover:bg-rose-600 disabled:bg-rose-300',
   };
 
   const sizeClasses = {
-    sm: 'px-4 py-2 text-sm',
-    md: 'px-6 py-3 text-sm',
-    lg: 'px-8 py-4 text-base',
+    sm: 'px-3 py-2 text-sm',
+    md: 'px-5 py-3 text-sm',
+    lg: 'px-6 py-4 text-base',
   };
 
   return (
     <button
       {...props}
       disabled={disabled || isLoading}
-      className={`rounded-2xl font-semibold transition ${variantClasses[variant]} ${sizeClasses[size]} disabled:cursor-not-allowed ${className}`}
+      className={`inline-flex items-center justify-center rounded-lg font-semibold transition disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
     >
       {isLoading ? 'Đang xử lý...' : children}
     </button>

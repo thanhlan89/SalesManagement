@@ -1,10 +1,32 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
+import { Link, useNavigate } from 'react-router-dom';
+
+const USERS_KEY = 'sales_management_users';
+const DEFAULT_DEMO_USER = {
+  displayName: 'Admin Sales',
+  email: 'admin@sales.com',
+  password: '123456',
+};
+
+const getStoredUsers = () => {
+  try {
+    const rawUsers = localStorage.getItem(USERS_KEY);
+    const parsedUsers = rawUsers ? JSON.parse(rawUsers) : [];
+
+    if (!Array.isArray(parsedUsers) || parsedUsers.length === 0) {
+      localStorage.setItem(USERS_KEY, JSON.stringify([DEFAULT_DEMO_USER]));
+      return [DEFAULT_DEMO_USER];
+    }
+
+    return parsedUsers;
+  } catch {
+    localStorage.setItem(USERS_KEY, JSON.stringify([DEFAULT_DEMO_USER]));
+    return [DEFAULT_DEMO_USER];
+  }
+};
 
 function Login() {
   const navigate = useNavigate();
-  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -16,29 +38,41 @@ function Login() {
     setIsLoading(true);
 
     try {
-      await login({ email, password });
+      const savedUsers = getStoredUsers();
+      const matchedUser = savedUsers.find(
+        (user: { email: string; password: string; displayName?: string }) =>
+          user.email.toLowerCase() === email.trim().toLowerCase() && user.password === password,
+      );
+
+      if (!matchedUser) {
+        setError('Email hoặc mật khẩu không đúng.');
+        setIsLoading(false);
+        return;
+      }
+
+      localStorage.setItem('access_token', 'mock-token');
+      localStorage.setItem('accessToken', 'mock-token');
+      localStorage.setItem(
+        'current_user',
+        JSON.stringify({
+          displayName: matchedUser.displayName || matchedUser.email,
+          email: matchedUser.email,
+        }),
+      );
+
       navigate('/dashboard');
-    } catch (err) {
-      setError('Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.');
+    } catch {
+      setError('Đăng nhập thất bại. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-100 via-white to-sky-50 px-4 py-10">
-      <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/70">
+    <div className="flex min-h-screen items-center justify-center bg-[#f0f2f5] px-4 py-8">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-100 text-2xl shadow-sm">
-            🛒
-          </div>
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-slate-500">
-            Sales Management
-          </p>
-          <h1 className="mt-4 text-3xl font-bold text-slate-900">Đăng nhập</h1>
-          <p className="mt-2 text-sm text-slate-500">
-            Vui lòng nhập email và mật khẩu để tiếp tục.
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900">Sales Management</h1>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
@@ -52,7 +86,7 @@ function Login() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               required
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
               placeholder="name@example.com"
             />
           </div>
@@ -67,13 +101,13 @@ function Login() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               required
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-sky-500 focus:ring-4 focus:ring-sky-100"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-100"
               placeholder="••••••••"
             />
           </div>
 
           {error ? (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-red-600">
               {error}
             </div>
           ) : null}
@@ -81,11 +115,18 @@ function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+            className="flex w-full items-center justify-center rounded-xl bg-blue-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-blue-300"
           >
             {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
           </button>
         </form>
+
+        <div className="mt-6 text-center text-sm text-slate-600">
+          Chưa có tài khoản?{' '}
+          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-700">
+            Đăng ký ngay
+          </Link>
+        </div>
       </div>
     </div>
   );

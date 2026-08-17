@@ -11,7 +11,9 @@
     "format": "prettier --write \"src/**/*.ts\" \"prisma/**/*.prisma\"",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "db:push": "prisma db push",
+    "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
@@ -44,5 +46,8 @@
     "prisma": "^5.22.0",
     "source-map-support": "^0.5.21",
     "typescript": "^5.0.0"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }
