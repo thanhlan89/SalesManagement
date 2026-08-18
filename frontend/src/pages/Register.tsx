@@ -8,7 +8,7 @@ function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('user');
+  const [role, setRole] = useState<UserRole>('customer');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -89,10 +89,17 @@ function RegisterPage() {
             <div className="role-picker">
               <button
                 type="button"
+                className={role === 'customer' ? 'selected' : ''}
+                onClick={() => setRole('customer')}
+              >
+                Khách hàng
+              </button>
+              <button
+                type="button"
                 className={role === 'user' ? 'selected' : ''}
                 onClick={() => setRole('user')}
               >
-                Người dùng
+                Nhân viên
               </button>
               <button
                 type="button"

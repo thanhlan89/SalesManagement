@@ -31,7 +31,7 @@ function LoginPage() {
         <section className="brand-panel">
           <div className="brand-logo">S</div>
           <h1>Sales Management</h1>
-          <p>Đăng nhập theo vai trò để vào khu vực quản lý hoặc khu vực người dùng.</p>
+          <p>Đăng nhập theo vai trò để vào khu vực quản lý, nhân viên hoặc khách hàng.</p>
         </section>
 
         <section className="auth-card">
@@ -62,7 +62,8 @@ function LoginPage() {
 
           <div className="demo-list">
             <p>Quản lý: manager@sales.com / 123456</p>
-            <p>Người dùng: user@sales.com / 123456</p>
+            <p>Nhân viên: user@sales.com / 123456</p>
+            <p>Khách hàng: customer@sales.com / 123456</p>
           </div>
 
           <p className="auth-switch">

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleRedirect from './components/RoleRedirect';
+import CustomerPortalPage from './pages/CustomerPortalPage';
 import LoginPage from './pages/Login';
 import CustomersPage from './pages/CustomersPage';
 import ManagerPage from './pages/ManagerPage';
@@ -13,17 +14,25 @@ function App() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<RoleRedirect />} />
       </Route>
+
       <Route element={<ProtectedRoute allowedRoles={['manager']} />}>
         <Route path="/manager" element={<ManagerPage />} />
         <Route path="/manager/users" element={<UsersPage />} />
         <Route path="/manager/customers" element={<CustomersPage />} />
       </Route>
+
       <Route element={<ProtectedRoute allowedRoles={['user']} />}>
         <Route path="/user" element={<UserPage />} />
       </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={['customer']} />}>
+        <Route path="/customer" element={<CustomerPortalPage />} />
+      </Route>
+
       <Route path="/" element={<RoleRedirect />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>

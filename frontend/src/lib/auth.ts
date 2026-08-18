@@ -1,4 +1,4 @@
-export type UserRole = 'manager' | 'user';
+export type UserRole = 'manager' | 'user' | 'customer';
 
 export type User = {
   id: string;
@@ -34,6 +34,15 @@ const defaultUsers: User[] = [
     active: true,
     createdAt: '2026-08-01T00:00:00.000Z',
   },
+  {
+    id: 'cus-1',
+    name: 'Khách hàng Demo',
+    email: 'customer@sales.com',
+    password: '123456',
+    role: 'customer',
+    active: true,
+    createdAt: '2026-08-01T00:00:00.000Z',
+  },
 ];
 
 function safeParseUsers(raw: string | null): User[] {
@@ -50,7 +59,8 @@ function safeParseUsers(raw: string | null): User[] {
         name: user.name || 'Người dùng',
         email: user.email || '',
         password: user.password || '',
-        role: user.role === 'manager' ? 'manager' : 'user',
+        role:
+          user.role === 'manager' || user.role === 'customer' ? user.role : 'user',
         active: typeof user.active === 'boolean' ? user.active : true,
         createdAt: user.createdAt || new Date().toISOString(),
       }));
@@ -118,7 +128,8 @@ export function updateUser(id: string, patch: Partial<Omit<User, 'id' | 'created
     ...patch,
     email: patch.email?.trim() || users[index].email,
     name: patch.name?.trim() || users[index].name,
-    role: patch.role ?? users[index].role,
+    role:
+      patch.role === 'manager' || patch.role === 'customer' ? patch.role : users[index].role,
     active: typeof patch.active === 'boolean' ? patch.active : users[index].active,
   };
 
@@ -171,7 +182,9 @@ export function getSession() {
 }
 
 export function getHomePath(role: UserRole) {
-  return role === 'manager' ? '/manager' : '/user';
+  if (role === 'manager') return '/manager';
+  if (role === 'customer') return '/customer';
+  return '/user';
 }
 
 export function logout() {
