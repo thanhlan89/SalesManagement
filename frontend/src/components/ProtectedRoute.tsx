@@ -1,10 +1,19 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { getHomePath, getSession, type UserRole } from '../lib/auth';
 
-function ProtectedRoute() {
-  const token = localStorage.getItem('access_token') || localStorage.getItem('accessToken');
+type ProtectedRouteProps = {
+  allowedRoles?: UserRole[];
+};
 
-  if (!token) {
+function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+  const session = getSession();
+
+  if (!session) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (allowedRoles && !allowedRoles.includes(session.role)) {
+    return <Navigate to={getHomePath(session.role)} replace />;
   }
 
   return <Outlet />;

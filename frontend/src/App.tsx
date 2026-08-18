@@ -1,35 +1,32 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import Login from './pages/Login';
-import RegisterPage from './pages/Register';
-import MainLayout from './components/MainLayout';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
-import DashboardPage from './pages/DashboardPage';
-import EmployeesPage from './pages/EmployeesPage';
-import ProductsPage from './pages/ProductsPage';
-import WarehousePage from './pages/WarehousePage';
-import SalesPage from './pages/SalesPage';
-import AccountingPage from './pages/AccountingPage';
+import RoleRedirect from './components/RoleRedirect';
+import LoginPage from './pages/Login';
+import CustomersPage from './pages/CustomersPage';
+import ManagerPage from './pages/ManagerPage';
+import RegisterPage from './pages/Register';
+import UsersPage from './pages/UsersPage';
+import UserPage from './pages/UserPage';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<RegisterPage />} />
-
-        <Route element={<ProtectedRoute />}>
-          <Route element={<MainLayout />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/employees" element={<EmployeesPage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/warehouse" element={<WarehousePage />} />
-            <Route path="/sales" element={<SalesPage />} />
-            <Route path="/accounting" element={<AccountingPage />} />
-          </Route>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <Routes>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<RoleRedirect />} />
+      </Route>
+      <Route element={<ProtectedRoute allowedRoles={['manager']} />}>
+        <Route path="/manager" element={<ManagerPage />} />
+        <Route path="/manager/users" element={<UsersPage />} />
+        <Route path="/manager/customers" element={<CustomersPage />} />
+      </Route>
+      <Route element={<ProtectedRoute allowedRoles={['user']} />}>
+        <Route path="/user" element={<UserPage />} />
+      </Route>
+      <Route path="/" element={<RoleRedirect />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
   );
 }
 
