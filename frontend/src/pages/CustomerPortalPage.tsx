@@ -2,17 +2,21 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSession, logout } from '../lib/auth';
 import {
+  calculateVoucherDiscount,
   formatCurrency,
   getCatalog,
   getCustomerOrders,
   getMyReviews,
   getProductReviewSummary,
   getProductReviews,
+  getVoucherByCode,
+  getVouchers,
   placeOrder,
   submitReview,
   type CartLine,
   type CatalogItem,
   type CustomerOrder,
+  type Voucher,
   type ProductReview,
 } from '../lib/storefront';
 
@@ -31,6 +35,8 @@ function CustomerPortalPage() {
   const [mode, setMode] = useState<ViewMode>('store');
   const [selectedProductId, setSelectedProductId] = useState(catalog[0]?.id ?? '');
   const [cart, setCart] = useState<CartLine[]>([]);
+  const [voucherCode, setVoucherCode] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState<Voucher | null>(null);
   const [orders, setOrders] = useState<CustomerOrder[]>(
     () => (session?.email ? getCustomerOrders(session.email) : []),
   );
@@ -68,6 +74,14 @@ function CustomerPortalPage() {
     );
   }, [cart, catalog]);
 
+  const voucherDiscount = useMemo(() => {
+    return calculateVoucherDiscount(cartSummary.total, appliedVoucher);
+  }, [appliedVoucher, cartSummary.total]);
+
+  const payableTotal = Math.max(0, cartSummary.total - voucherDiscount);
+
+  const availableVouchers = useMemo(() => getVouchers(), [message, mode, cartSummary.total]);
+
   const myReviews = useMemo(() => {
     return session?.email ? getMyReviews(session.email) : [];
   }, [session?.email, message, selectedProductId, mode]);
@@ -97,6 +111,30 @@ function CustomerPortalPage() {
     });
   };
 
+  const applyVoucher = () => {
+    const voucher = getVoucherByCode(voucherCode);
+    if (!voucher) {
+      setAppliedVoucher(null);
+      setMessage('Mã voucher không hợp lệ.');
+      return;
+    }
+
+    if (cartSummary.total < voucher.minOrder) {
+      setAppliedVoucher(null);
+      setMessage(`Đơn hàng tối thiểu để dùng mã này là ${formatCurrency(voucher.minOrder)}.`);
+      return;
+    }
+
+    setAppliedVoucher(voucher);
+    setMessage(`Đã áp dụng voucher ${voucher.code}.`);
+  };
+
+  const clearVoucher = () => {
+    setVoucherCode('');
+    setAppliedVoucher(null);
+    setMessage('Đã gỡ voucher.');
+  };
+
   const updateQuantity = (itemId: string, quantity: number) => {
     setCart((current) =>
       current
@@ -111,7 +149,7 @@ function CustomerPortalPage() {
       return;
     }
 
-    const order = placeOrder(session.email, cart);
+    const order = placeOrder(session.email, cart, appliedVoucher);
     if (!order) {
       setMessage('Không thể tạo đơn hàng.');
       return;
@@ -119,6 +157,8 @@ function CustomerPortalPage() {
 
     setOrders(getCustomerOrders(session.email));
     setCart([]);
+    setVoucherCode('');
+    setAppliedVoucher(null);
     setMessage(`Đã tạo đơn ${order.id}.`);
     setMode('orders');
   };
@@ -205,6 +245,10 @@ function CustomerPortalPage() {
             <div>
               <strong>{cartSummary.count}</strong>
               <span>Sản phẩm trong giỏ</span>
+            </div>
+            <div>
+              <strong>{availableVouchers.length}</strong>
+              <span>Voucher khả dụng</span>
             </div>
             <div>
               <strong>{orders.length}</strong>
@@ -309,8 +353,40 @@ function CustomerPortalPage() {
               </div>
 
               <div className="cart-total">
-                <span>Tổng thanh toán</span>
+                <span>Tạm tính</span>
                 <strong>{formatCurrency(cartSummary.total)}</strong>
+              </div>
+
+              <div className="voucher-box">
+                <div className="voucher-header">
+                  <strong>Voucher</strong>
+                  <span>{appliedVoucher ? appliedVoucher.code : 'Chưa áp dụng'}</span>
+                </div>
+                <div className="voucher-input-row">
+                  <input
+                    value={voucherCode}
+                    onChange={(event) => setVoucherCode(event.target.value)}
+                    placeholder="Nhập mã voucher"
+                  />
+                  <button type="button" onClick={applyVoucher}>
+                    Áp dụng
+                  </button>
+                </div>
+                {appliedVoucher ? (
+                  <div className="voucher-applied">
+                    <span>
+                      Giảm {formatCurrency(voucherDiscount)} từ mã {appliedVoucher.code}
+                    </span>
+                    <button type="button" onClick={clearVoucher}>
+                      Gỡ
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="cart-total final">
+                <span>Tổng thanh toán</span>
+                <strong>{formatCurrency(payableTotal)}</strong>
               </div>
 
               <button className="checkout-button" onClick={handlePlaceOrder}>

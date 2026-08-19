@@ -25,11 +25,15 @@ export type CustomerOrder = {
     price: number;
     quantity: number;
   }>;
+  subtotal: number;
+  discountAmount: number;
+  voucherCode?: string | null;
   total: number;
 };
 
 const ORDERS_KEY = 'sales_management_customer_orders';
 const REVIEWS_KEY = 'sales_management_product_reviews';
+const VOUCHERS_KEY = 'sales_management_vouchers';
 
 const catalog: CatalogItem[] = [
   {
@@ -94,6 +98,50 @@ const catalog: CatalogItem[] = [
   },
 ];
 
+export type Voucher = {
+  code: string;
+  title: string;
+  description: string;
+  kind: 'percent' | 'fixed';
+  value: number;
+  minOrder: number;
+  active: boolean;
+  expiresAt: string;
+};
+
+const defaultVouchers: Voucher[] = [
+  {
+    code: 'WELCOME10',
+    title: 'Giảm cho khách mới',
+    description: 'Giảm 10% cho đơn hàng đầu tiên.',
+    kind: 'percent',
+    value: 10,
+    minOrder: 500000,
+    active: true,
+    expiresAt: '2026-12-31T23:59:59.000Z',
+  },
+  {
+    code: 'SHIP50',
+    title: 'Ưu đãi phí ship',
+    description: 'Giảm 50.000đ cho đơn từ 1.000.000đ.',
+    kind: 'fixed',
+    value: 50000,
+    minOrder: 1000000,
+    active: true,
+    expiresAt: '2026-12-31T23:59:59.000Z',
+  },
+  {
+    code: 'VIP15',
+    title: 'Ưu đãi VIP',
+    description: 'Giảm 15% cho khách VIP.',
+    kind: 'percent',
+    value: 15,
+    minOrder: 2000000,
+    active: true,
+    expiresAt: '2026-12-31T23:59:59.000Z',
+  },
+];
+
 function safeParseOrders(raw: string | null): CustomerOrder[] {
   if (!raw) return [];
 
@@ -110,8 +158,55 @@ function getOrders() {
   return safeParseOrders(localStorage.getItem(ORDERS_KEY));
 }
 
+function safeParseVouchers(raw: string | null): Voucher[] {
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw) as Voucher[];
+    if (!Array.isArray(parsed)) return [];
+    return parsed;
+  } catch {
+    return [];
+  }
+}
+
+function seedVouchers() {
+  const current = safeParseVouchers(localStorage.getItem(VOUCHERS_KEY));
+  if (current.length === 0) {
+    localStorage.setItem(VOUCHERS_KEY, JSON.stringify(defaultVouchers));
+    return defaultVouchers;
+  }
+
+  const merged = [...current];
+  for (const voucher of defaultVouchers) {
+    const exists = merged.some((item) => item.code.toLowerCase() === voucher.code.toLowerCase());
+    if (!exists) merged.push(voucher);
+  }
+
+  localStorage.setItem(VOUCHERS_KEY, JSON.stringify(merged));
+  return merged;
+}
+
 export function getCatalog() {
   return catalog;
+}
+
+export function getVouchers() {
+  return seedVouchers().filter((voucher) => voucher.active);
+}
+
+export function getVoucherByCode(code: string) {
+  const normalized = code.trim().toLowerCase();
+  return getVouchers().find((voucher) => voucher.code.toLowerCase() === normalized) ?? null;
+}
+
+export function calculateVoucherDiscount(subtotal: number, voucher: Voucher | null) {
+  if (!voucher || subtotal < voucher.minOrder) return 0;
+
+  const discount =
+    voucher.kind === 'percent' ? subtotal * (voucher.value / 100) : voucher.value;
+
+  return Math.max(0, Math.min(discount, subtotal));
 }
 
 export function getAllOrders() {
@@ -128,7 +223,11 @@ export function getCustomerOrders(email: string) {
     .sort((a, b) => b.placedAt.localeCompare(a.placedAt));
 }
 
-export function placeOrder(email: string, lines: CartLine[]) {
+export function placeOrder(
+  email: string,
+  lines: CartLine[],
+  voucher?: Voucher | null,
+) {
   const normalizedLines = lines
     .map((line) => {
       const item = getCatalogItem(line.itemId);
@@ -150,13 +249,18 @@ export function placeOrder(email: string, lines: CartLine[]) {
 
   if (normalizedLines.length === 0) return null;
 
-  const total = normalizedLines.reduce((sum, line) => sum + line.price * line.quantity, 0);
+  const subtotal = normalizedLines.reduce((sum, line) => sum + line.price * line.quantity, 0);
+  const discountAmount = calculateVoucherDiscount(subtotal, voucher ?? null);
+  const total = subtotal - discountAmount;
   const order: CustomerOrder = {
     id: `ORD-${Date.now()}`,
     email,
     placedAt: new Date().toISOString(),
     status: 'processing',
     items: normalizedLines,
+    subtotal,
+    discountAmount,
+    voucherCode: voucher?.code ?? null,
     total,
   };
 
