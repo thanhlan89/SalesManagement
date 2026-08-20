@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSession, logout } from '../lib/auth';
 import {
@@ -12,15 +12,24 @@ import {
   getVoucherByCode,
   getVouchers,
   placeOrder,
+  searchCatalogByDescription,
   submitReview,
   type CartLine,
   type CatalogItem,
+  type CatalogSearchResult,
   type CustomerOrder,
   type Voucher,
   type ProductReview,
 } from '../lib/storefront';
 
 type ViewMode = 'store' | 'orders' | 'reviews' | 'account';
+
+type ChatMessage = {
+  id: string;
+  role: 'customer' | 'assistant';
+  text: string;
+  results?: CatalogSearchResult[];
+};
 
 const emptyReview = {
   rating: 5,
@@ -41,6 +50,14 @@ function CustomerPortalPage() {
     () => (session?.email ? getCustomerOrders(session.email) : []),
   );
   const [reviewForm, setReviewForm] = useState(emptyReview);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: 'welcome',
+      role: 'assistant',
+      text: 'Bạn cần tìm món gì? Hãy mô tả nhu cầu, ví dụ: "tai nghe chống ồn để họp" hoặc "quà tặng khách hàng giá rẻ".',
+    },
+  ]);
   const [message, setMessage] = useState('');
 
   const selectedProduct = useMemo(
@@ -187,6 +204,42 @@ function CustomerPortalPage() {
     setMode('reviews');
   };
 
+  const handleChatSubmit = (event?: FormEvent<HTMLFormElement>) => {
+    event?.preventDefault();
+    const question = chatInput.trim();
+    if (!question) return;
+
+    const results = searchCatalogByDescription(question, 3);
+    const assistantText =
+      results.length > 0
+        ? `Mình tìm thấy ${results.length} sản phẩm hợp với mô tả của bạn.`
+        : 'Mình chưa thấy sản phẩm nào thật sự khớp. Bạn thử mô tả rõ hơn về nhu cầu, khoảng giá hoặc mục đích sử dụng nhé.';
+
+    setChatMessages((current) => [
+      ...current,
+      {
+        id: `customer-${Date.now()}`,
+        role: 'customer',
+        text: question,
+      },
+      {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        text: assistantText,
+        results,
+      },
+    ]);
+    setChatInput('');
+    setMode('store');
+  };
+
+  const showChatProduct = (item: CatalogItem) => {
+    setSelectedProductId(item.id);
+    setQuery(item.name);
+    setMode('store');
+    setMessage(`Đã lọc theo ${item.name}.`);
+  };
+
   const featured = filteredCatalog.slice(0, 3);
 
   return (
@@ -271,6 +324,55 @@ function CustomerPortalPage() {
         {mode === 'store' ? (
           <section className="customer-layout">
             <div className="customer-content">
+              <section className="chat-assistant" aria-label="Trợ lý tìm sản phẩm">
+                <div className="section-head">
+                  <div>
+                    <h3>Trợ lý chọn sản phẩm</h3>
+                    <p>Mô tả nhu cầu, chatbot sẽ chỉ ra món phù hợp</p>
+                  </div>
+                </div>
+
+                <div className="chat-window">
+                  {chatMessages.map((chat) => (
+                    <div className={`chat-message ${chat.role}`} key={chat.id}>
+                      <p>{chat.text}</p>
+                      {chat.results?.length ? (
+                        <div className="chat-results">
+                          {chat.results.map((item) => (
+                            <article className="chat-result-card" key={item.id}>
+                              <div>
+                                <strong>{item.name}</strong>
+                                <span>{item.matchReasons.join(' · ')}</span>
+                                <small>
+                                  {formatCurrency(item.price)} · còn {item.stock}
+                                </small>
+                              </div>
+                              <div className="chat-result-actions">
+                                <button type="button" onClick={() => showChatProduct(item)}>
+                                  Xem
+                                </button>
+                                <button type="button" onClick={() => addToCart(item)}>
+                                  Thêm
+                                </button>
+                              </div>
+                            </article>
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+
+                <form className="chat-form" onSubmit={handleChatSubmit}>
+                  <input
+                    value={chatInput}
+                    onChange={(event) => setChatInput(event.target.value)}
+                    placeholder="Ví dụ: màn hình làm việc đa nhiệm dưới 8 triệu"
+                  />
+                  <button type="submit">Hỏi</button>
+                </form>
+              </section>
+
               <div className="section-head">
                 <h3>Sản phẩm</h3>
                 <p>{filteredCatalog.length} kết quả</p>

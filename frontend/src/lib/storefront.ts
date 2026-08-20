@@ -9,6 +9,11 @@ export type CatalogItem = {
   description: string;
 };
 
+export type CatalogSearchResult = CatalogItem & {
+  matchScore: number;
+  matchReasons: string[];
+};
+
 export type CartLine = {
   itemId: string;
   quantity: number;
@@ -189,6 +194,204 @@ function seedVouchers() {
 
 export function getCatalog() {
   return catalog;
+}
+
+const stopWords = new Set([
+  'anh',
+  'ban',
+  'can',
+  'cho',
+  'co',
+  'cua',
+  'de',
+  'do',
+  'em',
+  'gi',
+  'hang',
+  'khach',
+  'la',
+  'loai',
+  'minh',
+  'mon',
+  'mot',
+  'mua',
+  'nao',
+  'san',
+  'pham',
+  'tim',
+  'toi',
+  'tu',
+  'van',
+  'voi',
+]);
+
+const productIntentGroups = [
+  {
+    label: 'làm việc văn phòng',
+    triggers: ['van phong', 'lam viec', 'cong viec', 'office', 'di chuyen'],
+    keywords: ['van phong', 'lam viec', 'cong viec', 'di chuyen', 'da nhiem'],
+  },
+  {
+    label: 'phụ kiện',
+    triggers: ['phu kien', 'ban phim', 'tai nghe', 'phim', 'headphone'],
+    keywords: ['phu kien', 'ban phim', 'tai nghe', 'phim', 'micro', 'chong on'],
+  },
+  {
+    label: 'thoải mái lâu dài',
+    triggers: ['em', 'thoai mai', 'cong thai hoc', 'ngoi lau', 'cot song'],
+    keywords: ['em', 'thoang', 'cong thai hoc', 'cot song', 'ngoi'],
+  },
+  {
+    label: 'quà tặng khách hàng',
+    triggers: ['qua', 'tang', 'tri an', 'khach hang', 'set'],
+    keywords: ['qua tang', 'tri an', 'khach hang', 'set qua'],
+  },
+  {
+    label: 'họp trực tuyến',
+    triggers: ['hop', 'online', 'truc tuyen', 'micro', 'chong on'],
+    keywords: ['hop truc tuyen', 'micro', 'chong on', 'pin dai'],
+  },
+  {
+    label: 'màn hình hiển thị',
+    triggers: ['man hinh', 'hien thi', 'qhd', 'mau sac', 'da nhiem'],
+    keywords: ['man hinh', 'qhd', 'mau sac', 'da nhiem', 'do phan giai'],
+  },
+];
+
+function normalizeSearchText(value: string) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'd')
+    .toLowerCase();
+}
+
+function extractSearchTokens(value: string) {
+  return normalizeSearchText(value)
+    .split(/[^a-z0-9]+/g)
+    .filter((token) => token.length > 1 && !stopWords.has(token));
+}
+
+function parsePriceValue(value: string, unit?: string) {
+  const numericValue = Number(value.replace(',', '.'));
+  if (Number.isNaN(numericValue)) return null;
+
+  const normalizedUnit = normalizeSearchText(unit ?? '');
+  if (['trieu', 'tr', 'm'].includes(normalizedUnit)) return numericValue * 1000000;
+  if (['k', 'nghin', 'ngan'].includes(normalizedUnit)) return numericValue * 1000;
+  if (numericValue < 1000) return numericValue * 1000000;
+  return numericValue;
+}
+
+function extractPricePreference(message: string) {
+  const normalized = normalizeSearchText(message);
+  const matches = [...normalized.matchAll(/(\d+(?:[.,]\d+)?)\s*(trieu|tr|m|k|nghin|ngan)?/g)];
+  const values = matches
+    .map((match) => parsePriceValue(match[1], match[2]))
+    .filter((value): value is number => value !== null);
+
+  if (values.length === 0) return null;
+
+  const minValue = Math.min(...values);
+  const maxValue = Math.max(...values);
+  const wantsMax = /\b(duoi|toi da|khong qua|nho hon|re|gia re)\b/.test(normalized);
+  const wantsMin = /\b(tren|tu|lon hon|cao cap|premium)\b/.test(normalized);
+  const wantsAround = /\b(tam|khoang|quanh|gan)\b/.test(normalized);
+
+  if (values.length >= 2) {
+    return { minPrice: minValue, maxPrice: maxValue };
+  }
+
+  if (wantsMax) return { maxPrice: values[0] };
+  if (wantsMin) return { minPrice: values[0] };
+  if (wantsAround) {
+    return {
+      minPrice: Math.max(0, values[0] * 0.8),
+      maxPrice: values[0] * 1.2,
+    };
+  }
+
+  return { maxPrice: values[0] };
+}
+
+export function searchCatalogByDescription(message: string, limit = 4): CatalogSearchResult[] {
+  const normalizedMessage = normalizeSearchText(message);
+  const tokens = extractSearchTokens(message);
+  const pricePreference = extractPricePreference(message);
+
+  if (!normalizedMessage.trim()) return [];
+
+  return catalog
+    .map((item) => {
+      const searchableText = normalizeSearchText(
+        [item.name, item.category, item.description, item.badge].join(' '),
+      );
+      const normalizedName = normalizeSearchText(item.name);
+      const normalizedCategory = normalizeSearchText(item.category);
+      const normalizedBadge = normalizeSearchText(item.badge);
+      let matchScore = 0;
+      const reasons = new Set<string>();
+
+      if (normalizedMessage.includes(normalizedName)) {
+        matchScore += 10;
+        reasons.add('đúng tên sản phẩm');
+      }
+
+      for (const token of tokens) {
+        if (normalizedName.includes(token)) {
+          matchScore += 4;
+          reasons.add('trùng tên sản phẩm');
+        } else if (normalizedCategory.includes(token)) {
+          matchScore += 3;
+          reasons.add('đúng danh mục');
+        } else if (normalizedBadge.includes(token)) {
+          matchScore += 2;
+          reasons.add('đúng nhãn sản phẩm');
+        } else if (searchableText.includes(token)) {
+          matchScore += 1.5;
+          reasons.add('mô tả có đặc điểm này');
+        }
+      }
+
+      for (const group of productIntentGroups) {
+        const hasTrigger = group.triggers.some((trigger) => normalizedMessage.includes(trigger));
+        const hasProductKeyword = group.keywords.some((keyword) => searchableText.includes(keyword));
+
+        if (hasTrigger && hasProductKeyword) {
+          matchScore += 5;
+          reasons.add(group.label);
+        }
+      }
+
+      if (pricePreference?.minPrice !== undefined || pricePreference?.maxPrice !== undefined) {
+        const isAboveMin =
+          pricePreference.minPrice === undefined || item.price >= pricePreference.minPrice;
+        const isBelowMax =
+          pricePreference.maxPrice === undefined || item.price <= pricePreference.maxPrice;
+
+        if (isAboveMin && isBelowMax) {
+          matchScore += 4;
+          reasons.add('phù hợp ngân sách');
+        } else {
+          matchScore -= 6;
+        }
+      }
+
+      if (item.stock > 0) {
+        matchScore += 0.5;
+        reasons.add('còn hàng');
+      }
+
+      return {
+        ...item,
+        matchScore,
+        matchReasons: [...reasons].slice(0, 3),
+      };
+    })
+    .filter((item) => item.matchScore > 1)
+    .sort((a, b) => b.matchScore - a.matchScore || b.rating - a.rating)
+    .slice(0, limit);
 }
 
 export function getVouchers() {
