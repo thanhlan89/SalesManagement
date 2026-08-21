@@ -314,7 +314,7 @@ function CustomerPortalPage() {
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Tìm sản phẩm, danh mục, mô tả..."
+            placeholder="Bạn đang tìm gì? Hãy mô tả sản phẩm nhé..."
           />
           <button onClick={() => setMode('store')}>Xem cửa hàng</button>
         </div>

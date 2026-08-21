@@ -40,6 +40,22 @@ export class ProductsController {
     );
   }
 
+  @Get('semantic-search')
+  semanticSearch(
+    @Query('query') query = '',
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNumber = page ? parseInt(page, 10) : 1;
+    const limitNumber = limit ? parseInt(limit, 10) : 10;
+
+    return this.productsService.semanticSearch(
+      query,
+      Number.isNaN(pageNumber) ? 1 : Math.max(pageNumber, 1),
+      Number.isNaN(limitNumber) ? 10 : Math.min(Math.max(limitNumber, 1), 50),
+    );
+  }
+
   @Post()
   create(@Body() dto: CreateProductDto) {
     return this.productsService.create(dto);
