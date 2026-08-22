@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSession, logout } from '../lib/auth';
 import {
@@ -59,6 +59,7 @@ function CustomerPortalPage() {
     },
   ]);
   const [message, setMessage] = useState('');
+  const [productPage, setProductPage] = useState(1);
 
   const selectedProduct = useMemo(
     () => catalog.find((item) => item.id === selectedProductId) ?? catalog[0] ?? null,
@@ -76,6 +77,17 @@ function CustomerPortalPage() {
         .includes(term),
     );
   }, [catalog, query]);
+
+  useEffect(() => {
+    setProductPage(1);
+  }, [query]);
+
+  const productsPerPage = 10;
+  const totalProductPages = Math.max(1, Math.ceil(filteredCatalog.length / productsPerPage));
+  const displayedCatalog = filteredCatalog.slice(
+    (productPage - 1) * productsPerPage,
+    productPage * productsPerPage,
+  );
 
   const cartSummary = useMemo(() => {
     return cart.reduce(
@@ -379,7 +391,7 @@ function CustomerPortalPage() {
               </div>
 
               <div className="product-grid">
-                {filteredCatalog.map((item) => {
+                {displayedCatalog.map((item) => {
                   const summary = getProductReviewSummary(item.id);
                   return (
                     <article className="product-card" key={item.id}>
@@ -417,6 +429,29 @@ function CustomerPortalPage() {
                   );
                 })}
               </div>
+              {totalProductPages > 1 ? (
+                <div className="product-pagination" aria-label="Phân trang sản phẩm">
+                  <button
+                    type="button"
+                    disabled={productPage === 1}
+                    onClick={() => setProductPage((page) => Math.max(1, page - 1))}
+                  >
+                    Trang trước
+                  </button>
+                  <span>
+                    Trang {productPage} / {totalProductPages}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={productPage === totalProductPages}
+                    onClick={() =>
+                      setProductPage((page) => Math.min(totalProductPages, page + 1))
+                    }
+                  >
+                    Trang sau
+                  </button>
+                </div>
+              ) : null}
             </div>
 
             <aside className="cart-panel">

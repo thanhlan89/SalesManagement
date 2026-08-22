@@ -703,6 +703,34 @@ button {
   gap: 16px;
 }
 
+.product-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.product-pagination button {
+  border: 1px solid #2563eb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  font-weight: 800;
+}
+
+.product-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.product-pagination span {
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+
 .product-card {
   position: relative;
   padding: 18px;
@@ -1233,6 +1261,31 @@ button {
   border-color: #2563eb;
 }
 
+.panel-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.employee-search {
+  min-width: 190px;
+  border: 1px solid #dbe4ef;
+  border-radius: 10px;
+  padding: 9px 11px;
+  color: #0f172a;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+
+.employee-search:focus,
+.employee-note-editor textarea:focus {
+  outline: 3px solid rgb(37 99 235 / 15%);
+  border-color: #2563eb;
+}
+
 .order-list {
   display: grid;
   gap: 10px;
@@ -1381,6 +1434,86 @@ button {
 
 .customer-detail strong {
   color: #0f172a;
+}
+
+.employee-note-editor {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.employee-note-editor label {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.employee-note-editor textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  border: 1px solid #dbe4ef;
+  border-radius: 10px;
+  padding: 10px;
+  color: #0f172a;
+  background: #fff;
+  font: inherit;
+}
+
+.secondary-action {
+  color: #334155 !important;
+  background: #e2e8f0 !important;
+}
+
+.employee-inventory-panel {
+  margin-top: 18px;
+}
+
+.panel-subtitle {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.inventory-alert-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 0 20px 20px;
+}
+
+.inventory-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  padding: 13px;
+  background: #fff7ed;
+}
+
+.inventory-alert strong,
+.inventory-alert span {
+  display: block;
+}
+
+.inventory-alert strong {
+  color: #0f172a;
+  font-size: 13px;
+}
+
+.inventory-alert div span {
+  margin-top: 4px;
+  color: #9a3412;
+  font-size: 12px;
+}
+
+.stock-warning {
+  flex: 0 0 auto;
+  color: #c2410c;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 .customer-reviews {

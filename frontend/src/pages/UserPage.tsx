@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getSession, logout } from '../lib/auth';
-import { getCustomers, type Customer } from '../lib/customers';
+import { getCustomers, updateCustomer, type Customer } from '../lib/customers';
 import {
   formatCurrency,
   getAllOrders,
@@ -11,6 +11,7 @@ import {
 } from '../lib/storefront';
 
 type OrderFilter = 'all' | 'processing' | 'shipping' | 'completed';
+type EmployeeSection = 'overview' | 'orders' | 'customers' | 'inventory';
 
 const statusLabels: Record<CustomerOrder['status'], string> = {
   processing: 'Đang xử lý',
@@ -40,8 +41,14 @@ function UserPage() {
   const [orders, setOrders] = useState<CustomerOrder[]>(() => getAllOrders());
   const [customers, setCustomers] = useState<Customer[]>(() => getCustomers());
   const [filter, setFilter] = useState<OrderFilter>('all');
+  const [activeSection, setActiveSection] = useState<EmployeeSection>('overview');
+  const [orderSearch, setOrderSearch] = useState('');
+  const [customerSearch, setCustomerSearch] = useState('');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState('');
+  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [completedTasks, setCompletedTasks] = useState<string[]>([]);
 
   const selectedOrder = useMemo(
     () => orders.find((order) => order.id === selectedOrderId) ?? orders[0] ?? null,
@@ -54,9 +61,27 @@ function UserPage() {
   );
 
   const visibleOrders = useMemo(() => {
-    if (filter === 'all') return orders;
-    return orders.filter((order) => order.status === filter);
-  }, [filter, orders]);
+    const query = orderSearch.trim().toLowerCase();
+    return orders.filter((order) => {
+      const matchesStatus = filter === 'all' || order.status === filter;
+      const matchesSearch =
+        !query || order.id.toLowerCase().includes(query) || order.email.toLowerCase().includes(query);
+      return matchesStatus && matchesSearch;
+    });
+  }, [filter, orderSearch, orders]);
+
+  const visibleCustomers = useMemo(() => {
+    const query = customerSearch.trim().toLowerCase();
+    return customers
+      .filter((customer) => {
+        if (!query) return customer.active;
+        return [customer.name, customer.email, customer.company, customer.phone]
+          .join(' ')
+          .toLowerCase()
+          .includes(query);
+      })
+      .slice(0, 6);
+  }, [customerSearch, customers]);
 
   const metrics = useMemo(() => {
     const pending = orders.filter((order) => order.status === 'processing').length;
@@ -75,7 +100,7 @@ function UserPage() {
   }, [catalog, customers, orders]);
 
   const pendingCount = orders.filter((order) => order.status === 'processing').length;
-  const highlightCustomers = customers.filter((customer) => customer.active).slice(0, 4);
+  const highlightCustomers = visibleCustomers.slice(0, 4);
 
   const handleLogout = () => {
     logout();
@@ -92,6 +117,33 @@ function UserPage() {
     if (updated) {
       refreshData();
       setSelectedOrderId(updated.id);
+    }
+  };
+
+  const focusSection = (section: EmployeeSection) => {
+    setActiveSection(section);
+    document.getElementById(`employee-${section}`)?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const toggleTask = (title: string) => {
+    setCompletedTasks((current) =>
+      current.includes(title) ? current.filter((item) => item !== title) : [...current, title],
+    );
+  };
+
+  const startNoteEdit = () => {
+    if (!selectedCustomer) return;
+    setNoteDraft(selectedCustomer.notes);
+    setIsEditingNote(true);
+  };
+
+  const saveCustomerNote = () => {
+    if (!selectedCustomer) return;
+    const updated = updateCustomer(selectedCustomer.id, { notes: noteDraft });
+    if (updated) {
+      refreshData();
+      setSelectedCustomerId(updated.id);
+      setIsEditingNote(false);
     }
   };
 
@@ -112,12 +164,18 @@ function UserPage() {
         </div>
 
         <nav className="employee-nav">
-          <button className="active" type="button">
+          <button className={activeSection === 'overview' ? 'active' : ''} type="button" onClick={() => focusSection('overview')}>
             Tổng quan
           </button>
-          <button type="button">Đơn hàng</button>
-          <button type="button">Khách hàng</button>
-          <button type="button">Tồn kho</button>
+          <button className={activeSection === 'orders' ? 'active' : ''} type="button" onClick={() => focusSection('orders')}>
+            Đơn hàng
+          </button>
+          <button className={activeSection === 'customers' ? 'active' : ''} type="button" onClick={() => focusSection('customers')}>
+            Khách hàng
+          </button>
+          <button className={activeSection === 'inventory' ? 'active' : ''} type="button" onClick={() => focusSection('inventory')}>
+            Tồn kho
+          </button>
         </nav>
 
         <div className="employee-summary">
@@ -133,7 +191,7 @@ function UserPage() {
       </aside>
 
       <section className="employee-main">
-        <header className="employee-hero">
+        <header className="employee-hero" id="employee-overview">
           <div>
             <p className="eyebrow">Vận hành mượt, xử lý nhanh</p>
             <h2>Bảng điều khiển nhân viên</h2>
@@ -162,22 +220,31 @@ function UserPage() {
           <section className="panel">
             <div className="panel-heading">
               <h3>Công việc trong ca</h3>
-              <button type="button">+ Tạo việc</button>
+              <button type="button" onClick={() => setCompletedTasks([])}>Đặt lại checklist</button>
             </div>
             <div className="task-grid employee-task-grid">
               {tasks.map((task) => (
                 <article className="task-card" key={task.title}>
                   <h3>{task.title}</h3>
                   <p>{task.description}</p>
-                  <button type="button">Bắt đầu</button>
+                  <button type="button" onClick={() => toggleTask(task.title)}>
+                    {completedTasks.includes(task.title) ? 'Đã hoàn thành' : 'Bắt đầu'}
+                  </button>
                 </article>
               ))}
             </div>
           </section>
 
-          <aside className="panel employee-focus">
+          <aside className="panel employee-focus" id="employee-orders">
             <div className="panel-heading">
               <h3>Đơn ưu tiên</h3>
+              <input
+                className="employee-search"
+                value={orderSearch}
+                onChange={(event) => setOrderSearch(event.target.value)}
+                placeholder="Tìm mã đơn hoặc email"
+                aria-label="Tìm đơn hàng"
+              />
               <div className="order-filters">
                 {(['all', 'processing', 'shipping', 'completed'] as OrderFilter[]).map((item) => (
                   <button
@@ -273,12 +340,19 @@ function UserPage() {
         </div>
 
         <section className="employee-grid">
-          <article className="panel">
+          <article className="panel" id="employee-customers">
             <div className="panel-heading">
               <h3>Khách hàng ưu tiên</h3>
-              <button type="button" onClick={refreshData}>
-                Làm mới
-              </button>
+              <div className="panel-tools">
+                <input
+                  className="employee-search"
+                  value={customerSearch}
+                  onChange={(event) => setCustomerSearch(event.target.value)}
+                  placeholder="Tìm khách hàng"
+                  aria-label="Tìm khách hàng"
+                />
+                <button type="button" onClick={refreshData}>Làm mới</button>
+              </div>
             </div>
 
             <div className="customer-list">
@@ -304,7 +378,7 @@ function UserPage() {
           <article className="panel">
             <div className="panel-heading">
               <h3>Chi tiết khách hàng</h3>
-              <button type="button">Ghi chú</button>
+              <button type="button" onClick={startNoteEdit}>Ghi chú</button>
             </div>
 
             {selectedCustomer ? (
@@ -333,14 +407,48 @@ function UserPage() {
                       ? 'Ngưng'
                       : 'Mới'}
                 </p>
-                <p>
-                  <strong>Ghi chú:</strong> {selectedCustomer.notes}
-                </p>
+                {isEditingNote ? (
+                  <div className="employee-note-editor">
+                    <label htmlFor="customer-note">Ghi chú chăm sóc</label>
+                    <textarea
+                      id="customer-note"
+                      value={noteDraft}
+                      onChange={(event) => setNoteDraft(event.target.value)}
+                      rows={4}
+                    />
+                    <div className="order-actions">
+                      <button type="button" onClick={saveCustomerNote}>Lưu ghi chú</button>
+                      <button type="button" className="secondary-action" onClick={() => setIsEditingNote(false)}>
+                        Hủy
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p><strong>Ghi chú:</strong> {selectedCustomer.notes || 'Chưa có ghi chú.'}</p>
+                )}
               </div>
             ) : (
               <p className="empty-note">Chưa chọn khách hàng.</p>
             )}
           </article>
+        </section>
+
+        <section className="panel employee-inventory-panel" id="employee-inventory">
+          <div className="panel-heading">
+            <div>
+              <h3>Tồn kho cần chú ý</h3>
+              <p className="panel-subtitle">Các sản phẩm có thể cần bổ sung trong ca này.</p>
+            </div>
+            <button type="button" onClick={() => focusSection('inventory')}>Đang xem</button>
+          </div>
+          <div className="inventory-alert-list">
+            {catalog.filter((item) => item.stock <= 15).map((item) => (
+              <div className="inventory-alert" key={item.id}>
+                <div><strong>{item.name}</strong><span>{item.category}</span></div>
+                <span className="stock-warning">Còn {item.stock}</span>
+              </div>
+            ))}
+          </div>
         </section>
       </section>
     </main>

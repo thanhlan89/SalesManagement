@@ -40,7 +40,7 @@ const ORDERS_KEY = 'sales_management_customer_orders';
 const REVIEWS_KEY = 'sales_management_product_reviews';
 const VOUCHERS_KEY = 'sales_management_vouchers';
 
-const catalog: CatalogItem[] = [
+const featuredCatalog: CatalogItem[] = [
   {
     id: 'p-1',
     name: 'Laptop Slim Pro 14',
@@ -102,6 +102,64 @@ const catalog: CatalogItem[] = [
     description: 'Set quà nhỏ gọn để tri ân hoặc tiếp cận khách hàng mới.',
   },
 ];
+
+const generatedProductTemplates = [
+  {
+    category: 'Thiết bị văn phòng',
+    names: ['Laptop', 'Màn hình', 'Webcam', 'Máy in', 'Máy chiếu'],
+    features: 'phù hợp làm việc văn phòng, học tập và làm việc đa nhiệm',
+  },
+  {
+    category: 'Phụ kiện',
+    names: ['Tai nghe', 'Bàn phím cơ', 'Chuột không dây', 'Micro USB', 'Hub USB-C'],
+    features: 'thiết kế gọn nhẹ, kết nối ổn định, phù hợp làm việc lâu dài',
+  },
+  {
+    category: 'Nội thất',
+    names: ['Ghế công thái học', 'Bàn nâng hạ', 'Đèn bàn', 'Kệ màn hình', 'Tựa chân'],
+    features: 'tăng sự thoải mái, hỗ trợ tư thế và không gian làm việc tại nhà',
+  },
+  {
+    category: 'Quà tặng',
+    names: ['Bộ quà tặng', 'Sổ tay', 'Bình giữ nhiệt', 'Túi vải', 'Bút ký'],
+    features: 'nhỏ gọn, lịch sự, phù hợp tri ân khách hàng và sự kiện doanh nghiệp',
+  },
+];
+
+const generatedProductQualifiers = [
+  'Work',
+  'Pro',
+  'Silent',
+  'Air',
+  'Flex',
+  'Essential',
+  'Premium',
+  'Compact',
+  'Connect',
+  'Plus',
+];
+
+function createGeneratedCatalog(): CatalogItem[] {
+  return Array.from({ length: 994 }, (_, index) => {
+    const template = generatedProductTemplates[index % generatedProductTemplates.length];
+    const name = template.names[index % template.names.length];
+    const qualifier = generatedProductQualifiers[index % generatedProductQualifiers.length];
+    const sequence = index + 7;
+
+    return {
+      id: `p-${sequence}`,
+      name: `${name} ${qualifier} ${sequence}`,
+      category: template.category,
+      price: 450000 + ((index * 137000) % 18500000),
+      rating: Number((4 + ((index % 10) / 10)).toFixed(1)),
+      stock: (index * 17) % 81,
+      badge: index % 7 === 0 ? 'Bán chạy' : index % 5 === 0 ? 'Mới' : 'Có sẵn',
+      description: `${template.features}; mã sản phẩm mẫu ${sequence}.`,
+    };
+  });
+}
+
+const catalog: CatalogItem[] = [...featuredCatalog, ...createGeneratedCatalog()];
 
 export type Voucher = {
   code: string;
