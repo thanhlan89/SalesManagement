@@ -46,6 +46,9 @@ function UserPage() {
   const [customerSearch, setCustomerSearch] = useState('');
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(
+    () => catalog.find((item) => item.stock <= 15)?.id ?? catalog[0]?.id ?? null,
+  );
   const [noteDraft, setNoteDraft] = useState('');
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
@@ -58,6 +61,11 @@ function UserPage() {
   const selectedCustomer = useMemo(
     () => customers.find((customer) => customer.id === selectedCustomerId) ?? customers[0] ?? null,
     [customers, selectedCustomerId],
+  );
+
+  const selectedProduct = useMemo(
+    () => catalog.find((item) => item.id === selectedProductId) ?? catalog[0] ?? null,
+    [catalog, selectedProductId],
   );
 
   const visibleOrders = useMemo(() => {
@@ -441,13 +449,46 @@ function UserPage() {
             </div>
             <button type="button" onClick={() => focusSection('inventory')}>Đang xem</button>
           </div>
-          <div className="inventory-alert-list">
-            {catalog.filter((item) => item.stock <= 15).map((item) => (
-              <div className="inventory-alert" key={item.id}>
-                <div><strong>{item.name}</strong><span>{item.category}</span></div>
-                <span className="stock-warning">Còn {item.stock}</span>
+          <div className="inventory-content">
+            <div className="inventory-alert-list">
+              {catalog.filter((item) => item.stock <= 15).map((item) => (
+                <button
+                  className={`inventory-alert ${selectedProduct?.id === item.id ? 'active' : ''}`}
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSelectedProductId(item.id)}
+                >
+                  <div><strong>{item.name}</strong><span>{item.category}</span></div>
+                  <span className="stock-warning">Còn {item.stock}</span>
+                </button>
+              ))}
+            </div>
+
+            {selectedProduct ? (
+              <div className="product-detail" aria-live="polite">
+                <div className="detail-top">
+                  <div>
+                    <span className="product-detail-badge">{selectedProduct.badge}</span>
+                    <h4>{selectedProduct.name}</h4>
+                  </div>
+                  <strong className="product-detail-price">{formatCurrency(selectedProduct.price)}</strong>
+                </div>
+                <p className="product-detail-description">{selectedProduct.description}</p>
+                <h5 className="product-spec-heading">Thông số sản phẩm</h5>
+                <div className="product-spec-grid">
+                  <div><span>Mã sản phẩm</span><strong>{selectedProduct.id}</strong></div>
+                  <div><span>Danh mục</span><strong>{selectedProduct.category}</strong></div>
+                  <div><span>Đánh giá</span><strong>⭐ {selectedProduct.rating} / 5</strong></div>
+                  <div><span>Tồn kho</span><strong>{selectedProduct.stock} sản phẩm</strong></div>
+                </div>
+                <div className="product-pitch">
+                  <span>Gợi ý giới thiệu</span>
+                  <p>Đây là {selectedProduct.name}, {selectedProduct.description.toLowerCase()}</p>
+                </div>
               </div>
-            ))}
+            ) : (
+              <p className="empty-note">Chưa có sản phẩm để xem chi tiết.</p>
+            )}
           </div>
         </section>
       </section>
