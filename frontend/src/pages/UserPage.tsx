@@ -44,6 +44,8 @@ function UserPage() {
   const [activeSection, setActiveSection] = useState<EmployeeSection>('overview');
   const [orderSearch, setOrderSearch] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
+  const [inventorySearch, setInventorySearch] = useState('');
+  const [showAllInventory, setShowAllInventory] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
@@ -90,6 +92,16 @@ function UserPage() {
       })
       .slice(0, 6);
   }, [customerSearch, customers]);
+
+  const visibleInventory = useMemo(() => {
+    const query = inventorySearch.trim().toLowerCase();
+    return catalog
+      .filter((item) => showAllInventory || item.stock <= 15)
+      .filter((item) =>
+        !query || [item.id, item.name, item.category].join(' ').toLowerCase().includes(query),
+      )
+      .slice(0, 12);
+  }, [catalog, inventorySearch, showAllInventory]);
 
   const metrics = useMemo(() => {
     const pending = orders.filter((order) => order.status === 'processing').length;
@@ -447,11 +459,24 @@ function UserPage() {
               <h3>Tồn kho cần chú ý</h3>
               <p className="panel-subtitle">Các sản phẩm có thể cần bổ sung trong ca này.</p>
             </div>
-            <button type="button" onClick={() => focusSection('inventory')}>Đang xem</button>
+            <div className="panel-tools inventory-tools">
+              <input
+                className="employee-search"
+                value={inventorySearch}
+                onChange={(event) => setInventorySearch(event.target.value)}
+                placeholder="Tìm sản phẩm, mã hoặc danh mục"
+                aria-label="Tìm sản phẩm trong tồn kho"
+              />
+              <button type="button" onClick={() => setShowAllInventory((current) => !current)}>
+                {showAllInventory ? 'Chỉ tồn kho thấp' : 'Xem tất cả sản phẩm'}
+              </button>
+            </div>
           </div>
           <div className="inventory-content">
             <div className="inventory-alert-list">
-              {catalog.filter((item) => item.stock <= 15).map((item) => (
+              {visibleInventory.length === 0 ? (
+                <p className="empty-note">Không tìm thấy sản phẩm phù hợp.</p>
+              ) : visibleInventory.map((item) => (
                 <button
                   className={`inventory-alert ${selectedProduct?.id === item.id ? 'active' : ''}`}
                   key={item.id}
@@ -462,6 +487,9 @@ function UserPage() {
                   <span className="stock-warning">Còn {item.stock}</span>
                 </button>
               ))}
+              {visibleInventory.length > 0 && showAllInventory ? (
+                <p className="inventory-result-note">Hiển thị {visibleInventory.length} sản phẩm phù hợp.</p>
+              ) : null}
             </div>
 
             {selectedProduct ? (

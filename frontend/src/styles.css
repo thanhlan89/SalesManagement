@@ -2203,6 +2203,18 @@ td span {
     grid-template-columns: 1fr;
   }
 
+  .inventory-content {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-alert-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .inventory-tools {
+    flex-wrap: wrap;
+  }
+
   .voucher-input-row {
     flex-direction: column;
   }
@@ -2235,5 +2247,15 @@ td span {
 
   .stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .inventory-alert-list,
+  .product-spec-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-tools {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
