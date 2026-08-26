@@ -382,8 +382,11 @@ export function searchCatalogByDescription(message: string, limit = 4): CatalogS
 
   return catalog
     .map((item) => {
+      const reviewComments = getProductReviews(item.id)
+        .map((review) => review.comment)
+        .join(' ');
       const searchableText = normalizeSearchText(
-        [item.name, item.category, item.description, item.badge].join(' '),
+        [item.name, item.category, item.description, item.badge, reviewComments].join(' '),
       );
       const normalizedName = normalizeSearchText(item.name);
       const normalizedCategory = normalizeSearchText(item.category);
@@ -407,8 +410,13 @@ export function searchCatalogByDescription(message: string, limit = 4): CatalogS
           matchScore += 2;
           reasons.add('đúng nhãn sản phẩm');
         } else if (searchableText.includes(token)) {
-          matchScore += 1.5;
-          reasons.add('mô tả có đặc điểm này');
+          if (normalizeSearchText(reviewComments).includes(token)) {
+            matchScore += 3;
+            reasons.add('phù hợp đánh giá khách hàng');
+          } else {
+            matchScore += 1.5;
+            reasons.add('mô tả có đặc điểm này');
+          }
         }
       }
 

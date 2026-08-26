@@ -70,12 +70,13 @@ function CustomerPortalPage() {
     const term = query.trim().toLowerCase();
     if (!term) return catalog;
 
-    return catalog.filter((item) =>
-      [item.name, item.category, item.description, item.badge]
-        .join(' ')
-        .toLowerCase()
-        .includes(term),
-    );
+    return catalog.filter((item) => {
+      const catalogText = [item.name, item.category, item.description, item.badge].join(' ');
+      const reviewText = getProductReviews(item.id)
+        .map((review) => review.comment)
+        .join(' ');
+      return `${catalogText} ${reviewText}`.toLowerCase().includes(term);
+    });
   }, [catalog, query]);
 
   useEffect(() => {
