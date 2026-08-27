@@ -54,6 +54,7 @@ function UserPage() {
   const [noteDraft, setNoteDraft] = useState('');
   const [isEditingNote, setIsEditingNote] = useState(false);
   const [completedTasks, setCompletedTasks] = useState<string[]>([]);
+  const [copiedProductId, setCopiedProductId] = useState<string | null>(null);
 
   const selectedOrder = useMemo(
     () => orders.find((order) => order.id === selectedOrderId) ?? orders[0] ?? null,
@@ -164,6 +165,18 @@ function UserPage() {
       refreshData();
       setSelectedCustomerId(updated.id);
       setIsEditingNote(false);
+    }
+  };
+
+  const copyProductPitch = async () => {
+    if (!selectedProduct) return;
+
+    const pitch = `Đây là ${selectedProduct.name}, ${selectedProduct.description.toLowerCase()} Giá tham khảo: ${formatCurrency(selectedProduct.price)}.`;
+    try {
+      await navigator.clipboard.writeText(pitch);
+      setCopiedProductId(selectedProduct.id);
+    } catch {
+      setCopiedProductId(null);
     }
   };
 
@@ -512,6 +525,9 @@ function UserPage() {
                 <div className="product-pitch">
                   <span>Gợi ý giới thiệu</span>
                   <p>Đây là {selectedProduct.name}, {selectedProduct.description.toLowerCase()}</p>
+                  <button type="button" className="copy-pitch-button" onClick={copyProductPitch}>
+                    {copiedProductId === selectedProduct.id ? 'Đã sao chép' : 'Sao chép giới thiệu'}
+                  </button>
                 </div>
               </div>
             ) : (
