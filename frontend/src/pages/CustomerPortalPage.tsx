@@ -67,16 +67,10 @@ function CustomerPortalPage() {
   );
 
   const filteredCatalog = useMemo(() => {
-    const term = query.trim().toLowerCase();
+    const term = query.trim();
     if (!term) return catalog;
 
-    return catalog.filter((item) => {
-      const catalogText = [item.name, item.category, item.description, item.badge].join(' ');
-      const reviewText = getProductReviews(item.id)
-        .map((review) => review.comment)
-        .join(' ');
-      return `${catalogText} ${reviewText}`.toLowerCase().includes(term);
-    });
+    return searchCatalogByDescription(term, catalog.length);
   }, [catalog, query]);
 
   useEffect(() => {
