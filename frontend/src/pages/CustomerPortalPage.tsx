@@ -67,10 +67,16 @@ function CustomerPortalPage() {
   );
 
   const filteredCatalog = useMemo(() => {
-    const term = query.trim();
+    const term = query.trim().toLowerCase();
     if (!term) return catalog;
 
-    return searchCatalogByDescription(term, catalog.length);
+    return catalog.filter((item) => {
+      const catalogText = [item.name, item.category, item.description, item.badge].join(' ');
+      const reviewText = getProductReviews(item.id)
+        .map((review) => review.comment)
+        .join(' ');
+      return `${catalogText} ${reviewText}`.toLowerCase().includes(term);
+    });
   }, [catalog, query]);
 
   useEffect(() => {
@@ -323,7 +329,10 @@ function CustomerPortalPage() {
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Bạn đang tìm gì? Hãy mô tả sản phẩm nhé..."
           />
-          <button onClick={() => setMode('store')}>Xem cửa hàng</button>
+          <button type="button" onClick={() => setQuery('')} className="toolbar-secondary">
+            Xóa
+          </button>
+          <button type="button" onClick={() => setMode('store')}>Xem cửa hàng</button>
         </div>
 
         {message ? <div className="customer-banner">{message}</div> : null}

@@ -526,6 +526,28 @@ button {
   color: #fff;
   background: #0f766e;
   font-weight: 800;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.customer-toolbar button:hover,
+.checkout-button:hover,
+.support-button:hover,
+.chat-result-actions button:hover,
+.chat-form button:hover,
+.product-footer button:hover,
+.order-actions button:hover,
+.employee-nav button:hover,
+.customer-nav button:hover,
+.employee-logout:hover,
+.customer-logout:hover,
+.copy-pitch-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgb(15 118 110 / 12%);
+}
+
+.toolbar-secondary {
+  color: #0f172a !important;
+  background: #e2e8f0 !important;
 }
 
 .customer-banner {
@@ -1278,6 +1300,7 @@ button {
   background: #fff;
   font: inherit;
   font-size: 13px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .employee-search:focus,
@@ -1591,6 +1614,24 @@ button {
   color: #334155;
   font-size: 13px;
   line-height: 1.5;
+}
+
+.copy-pitch-button {
+  margin-top: 12px;
+  border: 0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  color: #fff;
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.inventory-result-note {
+  margin: 0;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .inventory-alert strong,

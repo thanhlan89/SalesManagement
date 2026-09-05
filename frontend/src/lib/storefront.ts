@@ -316,15 +316,6 @@ const productIntentGroups = [
   },
 ];
 
-const semanticSearchAliases = [
-  { aliases: ['ngoi lau', 'dau lung', 'moi lung', 'ngoi thoai mai'], terms: ['cong thai hoc', 'cot song', 'ngoi', 'em'] },
-  { aliases: ['nghe goi', 'nghe nhac', 'am thanh', 'hop truc tuyen'], terms: ['tai nghe', 'chong on', 'micro', 'pin dai'] },
-  { aliases: ['im lang', 'yen tinh', 'khong on'], terms: ['chong on', 'silent'] },
-  { aliases: ['lam viec nhieu cua so', 'da nhiem', 'nhieu ung dung'], terms: ['man hinh', 'qhd', 'da nhiem'] },
-  { aliases: ['qua tang', 'tri an', 'tang khach', 'qua doanh nghiep'], terms: ['qua tang', 'set qua', 'khach hang'] },
-  { aliases: ['mang di', 'nhe', 'di lai'], terms: ['mong nhe', 'di chuyen'] },
-];
-
 function normalizeSearchText(value: string) {
   return value
     .normalize('NFD')
@@ -338,12 +329,6 @@ function extractSearchTokens(value: string) {
   return normalizeSearchText(value)
     .split(/[^a-z0-9]+/g)
     .filter((token) => token.length > 1 && !stopWords.has(token));
-}
-
-function expandSemanticSearchTerms(normalizedMessage: string) {
-  return semanticSearchAliases
-    .filter((group) => group.aliases.some((alias) => normalizedMessage.includes(alias)))
-    .flatMap((group) => group.terms.map(normalizeSearchText));
 }
 
 function parsePriceValue(value: string, unit?: string) {
@@ -390,7 +375,7 @@ function extractPricePreference(message: string) {
 
 export function searchCatalogByDescription(message: string, limit = 4): CatalogSearchResult[] {
   const normalizedMessage = normalizeSearchText(message);
-  const tokens = [...new Set([...extractSearchTokens(message), ...expandSemanticSearchTerms(normalizedMessage)])];
+  const tokens = extractSearchTokens(message);
   const pricePreference = extractPricePreference(message);
 
   if (!normalizedMessage.trim()) return [];
